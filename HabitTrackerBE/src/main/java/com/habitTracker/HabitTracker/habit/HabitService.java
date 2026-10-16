@@ -8,11 +8,12 @@ import com.habitTracker.HabitTracker.user.User;
 import com.habitTracker.HabitTracker.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -38,11 +39,9 @@ public class HabitService {
     }
 
     @Transactional(readOnly = true)
-    public List<HabitResponse> listHabits(HabitQueryParams params) {
-        return habitRepository.findByUser(params.userSeqId(), params.activeOnly())
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<HabitResponse> listHabits(HabitQueryParams params, Pageable pageable) {
+        return habitRepository.findByUser(params.userSeqId(), params.activeOnly(), pageable)
+                .map(this::toResponse);
     }
 
     @Transactional(readOnly = true)

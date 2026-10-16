@@ -7,6 +7,8 @@ import com.habitTracker.HabitTracker.habit.dto.HabitUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,8 +17,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/habits")
@@ -31,8 +31,8 @@ public class HabitController {
     }
 
     @GetMapping
-    public List<HabitResponse> listHabits(@ParameterObject @Valid HabitQueryParams params) {
-        return habitService.listHabits(params);
+    public Page<HabitResponse> listHabits(@ParameterObject @Valid HabitQueryParams params, @ParameterObject Pageable pageable) {
+        return habitService.listHabits(params, pageable);
     }
 
     @GetMapping("/{habitSeqId}")

@@ -7,11 +7,12 @@ import com.habitTracker.HabitTracker.habitfield.dto.HabitFieldResponse;
 import com.habitTracker.HabitTracker.habitfield.dto.HabitFieldUpdateRequest;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -37,11 +38,9 @@ public class HabitFieldService {
     }
 
     @Transactional(readOnly = true)
-    public List<HabitFieldResponse> listFields(Long habitSeqId) {
-        return habitFieldRepository.findByHabit(habitSeqId)
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<HabitFieldResponse> listFields(Long habitSeqId, Pageable pageable) {
+        return habitFieldRepository.findByHabit(habitSeqId, pageable)
+                .map(this::toResponse);
     }
 
     @Transactional
