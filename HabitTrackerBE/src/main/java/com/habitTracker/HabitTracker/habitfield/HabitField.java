@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -43,6 +44,9 @@ public class HabitField {
 
     @Column(name = "unit", length = 30)
     private String unit;
+
+    @Column(name = "goal_value", precision = 12, scale = 2)
+    private BigDecimal goalValue;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

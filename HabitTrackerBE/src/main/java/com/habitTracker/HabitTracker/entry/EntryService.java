@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -51,9 +52,24 @@ public class EntryService {
         entry.setEntryValue(request.entryValue());
         entry.setUpdatedAt(now);
         entry.setUpdatedBy(updatedBy);
+        entry.setCompleted(isCompleted(habitField, request.entryValue()));
         entry = entryRepository.save(entry);
 
         return toResponse(entry);
+    }
+
+    private boolean isCompleted(HabitField habitField, String entryValue) {
+        BigDecimal goalValue = habitField.getGoalValue();
+        if (goalValue == null) {
+            return true;
+        }
+        BigDecimal parsed;
+        try {
+            parsed = new BigDecimal(entryValue);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("entryValue must be numeric for a goal-based field: " + entryValue);
+        }
+        return parsed.compareTo(goalValue) >= 0;
     }
 
     @Transactional(readOnly = true)
@@ -77,9 +93,12 @@ public class EntryService {
         LocalDate inceptionDate = entryRepository.findInceptionDate(habitFieldSeqId).orElse(today);
         LocalDate windowStart = inceptionDate.isAfter(today.minusWeeks(4)) ? inceptionDate : today.minusWeeks(4);
 
-        List<LocalDate> completedDates = entryRepository.findCompletedDates(habitFieldSeqId, windowStart);
+        List<ConsistencyResponse.EntryStatus> entries = entryRepository.findInWindow(habitFieldSeqId, windowStart)
+                .stream()
+                .map(e -> new ConsistencyResponse.EntryStatus(e.getEntryDate(), e.isCompleted()))
+                .toList();
 
-        return new ConsistencyResponse(habitFieldSeqId, windowStart, today, completedDates);
+        return new ConsistencyResponse(habitFieldSeqId, windowStart, today, entries);
     }
 
     private EntryResponse toResponse(Entry entry) {
@@ -90,7 +109,8 @@ public class EntryService {
                 entry.getEntryDate(),
                 entry.getEntryTimestamp(),
                 entry.getUpdatedAt(),
-                entry.getUpdatedBy().getUserSeqId()
+                entry.getUpdatedBy().getUserSeqId(),
+                entry.isCompleted()
         );
     }
 }

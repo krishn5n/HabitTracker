@@ -10,5 +10,6 @@ public record EntryResponse(
         LocalDate entryDate,
         LocalDateTime entryTimestamp,
         LocalDateTime updatedAt,
-        Long updatedBy
+        Long updatedBy,
+        boolean completed
 ) {}

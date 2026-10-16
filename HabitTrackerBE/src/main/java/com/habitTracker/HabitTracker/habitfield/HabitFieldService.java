@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Service
@@ -26,11 +27,14 @@ public class HabitFieldService {
         Habit habit = habitRepository.findById(habitSeqId)
                 .orElseThrow(() -> new EntityNotFoundException("Habit not found: " + habitSeqId));
 
+        validateGoal(request.fieldType(), request.goalValue());
+
         HabitField field = new HabitField();
         field.setHabit(habit);
         field.setFieldName(request.fieldName() != null ? request.fieldName() : habit.getName());
         field.setFieldType(request.fieldType());
         field.setUnit(request.unit());
+        field.setGoalValue(request.goalValue());
         field.setCreatedAt(LocalDateTime.now());
         field = habitFieldRepository.save(field);
 
@@ -53,8 +57,21 @@ public class HabitFieldService {
         if (request.unit() != null) {
             field.setUnit(request.unit());
         }
+        if (request.goalValue() != null) {
+            validateGoal(field.getFieldType(), request.goalValue());
+            field.setGoalValue(request.goalValue());
+        }
 
         return toResponse(field);
+    }
+
+    private void validateGoal(HabitFieldType fieldType, BigDecimal goalValue) {
+        if (goalValue == null) {
+            return;
+        }
+        if (fieldType != HabitFieldType.NUMBER && fieldType != HabitFieldType.DURATION) {
+            throw new IllegalArgumentException("goalValue only applies to NUMBER or DURATION fields, not " + fieldType);
+        }
     }
 
     @Transactional
@@ -73,7 +90,8 @@ public class HabitFieldService {
                 field.getHabit().getHabitSeqId(),
                 field.getFieldName(),
                 field.getFieldType(),
-                field.getUnit()
+                field.getUnit(),
+                field.getGoalValue()
         );
     }
 }

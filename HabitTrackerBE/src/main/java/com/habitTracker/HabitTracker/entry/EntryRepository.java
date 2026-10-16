@@ -30,9 +30,9 @@ public interface EntryRepository extends JpaRepository<Entry, Long> {
     @Query("SELECT MIN(e.entryDate) FROM Entry e WHERE e.habitField.habitFieldSeqId = :habitFieldSeqId")
     Optional<LocalDate> findInceptionDate(@Param("habitFieldSeqId") Long habitFieldSeqId);
 
-    @Query("SELECT e.entryDate FROM Entry e WHERE e.habitField.habitFieldSeqId = :habitFieldSeqId "
+    @Query("SELECT e FROM Entry e WHERE e.habitField.habitFieldSeqId = :habitFieldSeqId "
             + "AND e.entryDate >= :windowStart ORDER BY e.entryDate")
-    List<LocalDate> findCompletedDates(@Param("habitFieldSeqId") Long habitFieldSeqId, @Param("windowStart") LocalDate windowStart);
+    List<Entry> findInWindow(@Param("habitFieldSeqId") Long habitFieldSeqId, @Param("windowStart") LocalDate windowStart);
 
     @Query("SELECT e FROM Entry e WHERE e.habitField.habitFieldSeqId IN :habitFieldSeqIds AND e.entryDate = :entryDate")
     List<Entry> findByHabitFieldsAndDate(@Param("habitFieldSeqIds") List<Long> habitFieldSeqIds, @Param("entryDate") LocalDate entryDate);

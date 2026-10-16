@@ -7,5 +7,7 @@ public record ConsistencyResponse(
         Long habitFieldSeqId,
         LocalDate windowStart,
         LocalDate windowEnd,
-        List<LocalDate> completedDates
-) {}
+        List<EntryStatus> entries
+) {
+    public record EntryStatus(LocalDate entryDate, boolean completed) {}
+}

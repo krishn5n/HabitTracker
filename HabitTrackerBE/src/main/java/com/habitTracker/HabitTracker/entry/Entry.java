@@ -50,4 +50,7 @@ public class Entry {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "updated_by", nullable = false)
     private User updatedBy;
+
+    @Column(name = "completed", nullable = false, columnDefinition = "boolean default false")
+    private boolean completed;
 }
