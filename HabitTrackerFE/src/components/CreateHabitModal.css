@@ -1,0 +1,45 @@
+.field-type-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-xs);
+}
+
+@media (min-width: 24rem) {
+  .field-type-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.field-type-option {
+  text-align: left;
+  border: 1px solid var(--color-rule-2);
+  border-radius: var(--radius-md);
+  background: var(--color-paper);
+  padding: var(--space-sm);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  transition: border-color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .field-type-option:hover {
+    background: var(--color-paper-2);
+  }
+}
+
+.field-type-option--active {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.field-type-option__label {
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+.field-type-option__hint {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}

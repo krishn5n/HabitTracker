@@ -1,0 +1,130 @@
+/* Hallmark · genre: editorial · macrostructure: Bento Grid (adapted — app dashboard, not landing page)
+ * theme: Almanac (custom-tuned) · nav: N9 edge-aligned minimal + tab row · footer: Ft2 inline single line
+ * fonts: Fraunces (display) · IBM Plex Sans (body) · JetBrains Mono (outlier — wordmark + today-stat only)
+ * accent: terracotta (warm, hue 35) · secondary: ochre (warm, hue 70, "missed" state only)
+ */
+
+:root {
+  /* ---- colour — paper / ink / neutrals, warm anchor hue 35 ---- */
+  --color-paper:     oklch(97%  0.010 60);
+  --color-paper-2:   oklch(94%  0.012 60);
+  --color-paper-3:   oklch(91%  0.013 55);
+  --color-rule:      oklch(84%  0.012 55);
+  --color-rule-2:    oklch(78%  0.014 50);
+  --color-neutral:   oklch(56%  0.012 45);
+  --color-muted:     oklch(44%  0.012 45);
+  --color-ink-2:     oklch(30%  0.014 40);
+  --color-ink:       oklch(19%  0.014 40);
+
+  /* ---- accent — terracotta (completed / primary / focus-adjacent) ---- */
+  --color-accent:       oklch(55% 0.145 35);
+  --color-accent-ink:   oklch(98% 0.010 35);
+  --color-accent-soft:  oklch(91% 0.035 35);
+  --color-focus:        oklch(52% 0.18  48);
+
+  /* ---- secondary — ochre (goal-set-but-missed state only) ---- */
+  --color-ochre:       oklch(62% 0.13 70);
+  --color-ochre-soft:  oklch(92% 0.045 70);
+
+  /* ---- status (errors; paired w/ icon+text, never colour-only) ---- */
+  --color-error:      oklch(52% 0.18 25);
+  --color-error-soft: oklch(93% 0.035 25);
+
+  /* ---- type ---- */
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-body:    "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-outlier: "JetBrains Mono", ui-monospace, monospace;
+
+  --text-xs:      0.75rem;
+  --text-sm:      0.875rem;
+  --text-base:    1rem;
+  --text-md:      1.25rem;
+  --text-lg:      1.5625rem;
+  --text-xl:      1.9531rem;
+  --text-2xl:     2.4414rem;
+  --text-display: clamp(2.5rem, 4vw + 1rem, 4.25rem);
+  --text-stat:    clamp(2.75rem, 5vw + 1rem, 4.75rem);
+
+  /* ---- space — 4pt scale ---- */
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs:  0.5rem;
+  --space-sm:  0.75rem;
+  --space-md:  1rem;
+  --space-lg:  1.5rem;
+  --space-xl:  2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+
+  /* ---- motion — Almanac register: functional, reference-book, slightly damped ---- */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:     cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 102ms;  /* 120ms x 0.85 almanac scale */
+  --dur-short: 187ms;  /* 220ms x 0.85 */
+  --dur-long:  357ms;  /* 420ms x 0.85 */
+
+  /* ---- radius — soft, ledger-card feel ---- */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.875rem;
+
+  /* ---- z-scale ---- */
+  --z-base:     1;
+  --z-raised:   10;
+  --z-dropdown: 100;
+  --z-sticky:   200;
+  --z-modal:    400;
+  --z-toast:    500;
+  --z-tooltip:  600;
+
+  --control-height: 2.75rem; /* 44px — shared by inputs + buttons */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-paper:     oklch(15% 0.012 50);
+    --color-paper-2:   oklch(18% 0.013 50);
+    --color-paper-3:   oklch(21% 0.014 50);
+    --color-rule:      oklch(30% 0.012 50);
+    --color-rule-2:    oklch(35% 0.013 50);
+    --color-neutral:   oklch(60% 0.010 45);
+    --color-muted:     oklch(72% 0.008 45);
+    --color-ink-2:     oklch(88% 0.008 45);
+    --color-ink:       oklch(94% 0.006 45);
+
+    --color-accent:      oklch(66% 0.12 38);
+    --color-accent-ink:  oklch(16% 0.014 40);
+    --color-accent-soft: oklch(26% 0.045 38);
+    --color-focus:       oklch(70% 0.16 48);
+
+    --color-ochre:      oklch(70% 0.11 72);
+    --color-ochre-soft: oklch(28% 0.05 72);
+
+    --color-error:      oklch(68% 0.16 25);
+    --color-error-soft: oklch(28% 0.06 25);
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-paper:     oklch(15% 0.012 50);
+  --color-paper-2:   oklch(18% 0.013 50);
+  --color-paper-3:   oklch(21% 0.014 50);
+  --color-rule:      oklch(30% 0.012 50);
+  --color-rule-2:    oklch(35% 0.013 50);
+  --color-neutral:   oklch(60% 0.010 45);
+  --color-muted:     oklch(72% 0.008 45);
+  --color-ink-2:     oklch(88% 0.008 45);
+  --color-ink:       oklch(94% 0.006 45);
+
+  --color-accent:      oklch(66% 0.12 38);
+  --color-accent-ink:  oklch(16% 0.014 40);
+  --color-accent-soft: oklch(26% 0.045 38);
+  --color-focus:       oklch(70% 0.16 48);
+
+  --color-ochre:      oklch(70% 0.11 72);
+  --color-ochre-soft: oklch(28% 0.05 72);
+
+  --color-error:      oklch(68% 0.16 25);
+  --color-error-soft: oklch(28% 0.06 25);
+}

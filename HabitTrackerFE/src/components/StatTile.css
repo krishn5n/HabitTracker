@@ -1,0 +1,26 @@
+.stat-tile {
+  justify-content: center;
+  align-items: flex-start;
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+}
+
+.stat-tile__value {
+  font-family: var(--font-outlier);
+  font-size: var(--text-stat);
+  font-weight: 500;
+  color: var(--color-paper);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.stat-tile__total {
+  font-size: var(--text-md);
+  color: var(--color-rule-2);
+}
+
+.stat-tile__label {
+  font-size: var(--text-sm);
+  color: var(--color-rule-2);
+  font-weight: 600;
+}

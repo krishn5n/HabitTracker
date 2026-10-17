@@ -1,0 +1,11 @@
+[
+  {
+    "date": "2026-10-17",
+    "macrostructure": "Bento Grid (adapted — app dashboard)",
+    "theme": "custom",
+    "theme_axes": "mid-light paper / high-contrast-serif display / warm-chromatic-other (terracotta)",
+    "vibe": "editorial almanac, daily-record, quietly premium",
+    "enrichment": "none",
+    "brief": "Habit Tracker FE — dashboard + habit/field/entry management against HabitTrackerBE REST API"
+  }
+]
