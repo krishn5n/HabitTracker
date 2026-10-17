@@ -47,6 +47,11 @@ public class HabitFieldService {
                 .map(this::toResponse);
     }
 
+    @Transactional(readOnly = true)
+    public HabitFieldResponse getField(Long habitFieldSeqId) {
+        return toResponse(findOrThrow(habitFieldSeqId));
+    }
+
     @Transactional
     public HabitFieldResponse updateField(Long habitFieldSeqId, HabitFieldUpdateRequest request) {
         HabitField field = findOrThrow(habitFieldSeqId);

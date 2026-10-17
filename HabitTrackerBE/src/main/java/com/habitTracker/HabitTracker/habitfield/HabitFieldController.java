@@ -33,6 +33,11 @@ public class HabitFieldController {
         return habitFieldService.listFields(habitSeqId, pageable);
     }
 
+    @GetMapping("/api/habit-fields/{habitFieldSeqId}")
+    public HabitFieldResponse getField(@PathVariable Long habitFieldSeqId) {
+        return habitFieldService.getField(habitFieldSeqId);
+    }
+
     @PutMapping("/api/habit-fields/{habitFieldSeqId}")
     public HabitFieldResponse updateField(@PathVariable Long habitFieldSeqId, @Valid @RequestBody HabitFieldUpdateRequest request) {
         return habitFieldService.updateField(habitFieldSeqId, request);
