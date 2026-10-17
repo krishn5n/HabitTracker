@@ -55,6 +55,7 @@ public class DashboardService {
                 field.getFieldName(),
                 field.getFieldType(),
                 field.getUnit(),
+                field.getGoalValue(),
                 todayEntry != null && todayEntry.isCompleted(),
                 todayEntry != null ? todayEntry.getEntryValue() : null,
                 todayEntry != null ? todayEntry.getUpdatedAt() : null
