@@ -34,3 +34,6 @@ build/
 
 ### App data ###
 /data/
+
+### IDE build output ###
+/out/

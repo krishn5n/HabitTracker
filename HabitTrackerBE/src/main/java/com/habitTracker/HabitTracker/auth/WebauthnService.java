@@ -111,6 +111,7 @@ public class WebauthnService {
             User newUser = new User();
             newUser.setEmail(request.email());
             newUser.setDisplayName(request.displayName());
+            newUser.setDateOfBirth(request.dateOfBirth());
             newUser.setCreatedAt(LocalDateTime.now());
             newUser.setUpdatedAt(LocalDateTime.now());
             return newUser;
