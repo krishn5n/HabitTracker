@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Claude / Hallmark local files
+.claude/
+.hallmark/
