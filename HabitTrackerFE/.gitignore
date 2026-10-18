@@ -26,3 +26,6 @@ dist-ssr
 # Claude / Hallmark local files
 .claude/
 .hallmark/
+
+# TS build cache
+*.tsbuildinfo
