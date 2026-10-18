@@ -37,3 +37,6 @@ build/
 
 ### IDE build output ###
 /out/
+
+### Claude / agents local files ###
+.agents/
