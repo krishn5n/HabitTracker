@@ -1,99 +1,118 @@
 package com.habitTracker.HabitTracker.datasync;
 
+import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.util.concurrent.TimeUnit;
+import java.time.Instant;
+import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Periodically commits and pushes the H2 data file to GitHub so it survives
- * restarts/redeploys on hosts without durable local storage.
+ * Durable storage for a host with no durable disk: the working database lives
+ * on the ephemeral filesystem, while the encrypted snapshot in a private GitHub
+ * repository is the copy that actually survives a restart.
  */
 @Service
 public class DataSyncService {
 
     private static final Logger log = LoggerFactory.getLogger(DataSyncService.class);
 
-    private final JdbcTemplate jdbcTemplate;
+    private final DataSyncProperties properties;
+    private final GitHubContentsClient github;
+    private final SnapshotCodec codec;
+    private final SnapshotExporter exporter;
+    private final SnapshotImporter importer;
+    private final SyncState state;
 
-    @Value("${app.data-sync.enabled:false}")
-    private boolean enabled;
+    /** Pushes never overlap, so a hard and an idle push landing together serialise. */
+    private final ReentrantLock pushLock = new ReentrantLock();
 
-    @Value("${app.data-sync.repo-dir:.}")
-    private String repoDir;
-
-    @Value("${app.data-sync.data-path:data}")
-    private String dataPath;
-
-    @Value("${app.data-sync.branch:master}")
-    private String branch;
-
-    @Value("${app.data-sync.github-repo:}")
-    private String githubRepo;
-
-    public DataSyncService(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public DataSyncService(DataSyncProperties properties,
+                           GitHubContentsClient github,
+                           SnapshotCodec codec,
+                           SnapshotExporter exporter,
+                           SnapshotImporter importer,
+                           SyncState state) {
+        this.properties = properties;
+        this.github = github;
+        this.codec = codec;
+        this.exporter = exporter;
+        this.importer = importer;
+        this.state = state;
     }
 
-    @Scheduled(fixedRateString = "${app.data-sync.push-interval-ms:840000}")
-    public void pushSnapshot() {
-        if (!enabled) {
+    /** Pulls the snapshot and loads it into the database. Called once at startup. */
+    public void restore() {
+        if (!usable("restore")) {
             return;
         }
-        String token = System.getenv("GITHUB_TOKEN");
-        if (token == null || token.isBlank()) {
-            log.warn("GITHUB_TOKEN not set; skipping data sync push");
-            return;
-        }
-
         try {
-            jdbcTemplate.execute("CHECKPOINT");
-
-            run("add", dataPath);
-            if (run("diff", "--cached", "--quiet", "--", dataPath) == 0) {
+            Optional<byte[]> envelope = github.fetch();
+            if (envelope.isEmpty()) {
+                log.warn("No snapshot at {}/{} yet; starting with an empty database",
+                        properties.getRepo(), properties.getPath());
                 return;
             }
-
-            run("-c", "user.email=habit-sync@local", "-c", "user.name=Habit Sync Bot",
-                    "commit", "-m", "chore: sync habit data snapshot");
-
-            String pushUrl = "https://x-access-token:" + token + "@github.com/" + githubRepo + ".git";
-            int pushExit = run("push", pushUrl, "HEAD:" + branch);
-            if (pushExit != 0) {
-                throw new IllegalStateException("git push failed with exit " + pushExit);
-            }
-            log.info("Pushed habit data snapshot to {}", branch);
+            importer.importSnapshot(codec.open(envelope.get()));
+            state.clearDirty();
+            log.info("Restored data from {}/{}", properties.getRepo(), properties.getPath());
         } catch (Exception e) {
-            log.error("Data sync push failed", e);
+            // Serving stale-but-present local data beats refusing to boot.
+            log.error("Restore from GitHub failed; continuing with whatever is on local disk", e);
         }
     }
 
-    private int run(String... args) throws Exception {
-        String[] command = new String[args.length + 1];
-        command[0] = "git";
-        System.arraycopy(args, 0, command, 1, args.length);
+    /**
+     * Exports, encrypts and commits the snapshot.
+     *
+     * @param reason what triggered this push, recorded in the commit message
+     * @param onlyIfDirty skip when nothing has been written since the last push
+     */
+    public void push(String reason, boolean onlyIfDirty) {
+        if (!usable("push")) {
+            return;
+        }
+        if (onlyIfDirty && !state.isDirty()) {
+            log.debug("Skipping {} push: no writes since the last snapshot", reason);
+            return;
+        }
 
-        ProcessBuilder pb = new ProcessBuilder(command);
-        pb.directory(new File(repoDir));
-        pb.redirectErrorStream(true);
-        Process process = pb.start();
-        String output = new String(process.getInputStream().readAllBytes());
-        boolean finished = process.waitFor(2, TimeUnit.MINUTES);
-        if (!finished) {
-            process.destroyForcibly();
-            throw new IllegalStateException("git command timed out");
+        pushLock.lock();
+        try {
+            byte[] snapshot = codec.seal(exporter.export());
+            github.push(snapshot, "chore: habit data snapshot (" + reason + ") " + Instant.now());
+            state.clearDirty();
+            log.info("Pushed snapshot ({}), {} bytes encrypted", reason, snapshot.length);
+        } catch (Exception e) {
+            // Leave the dirty flag set so the next tick retries.
+            log.error("Snapshot push ({}) failed", reason, e);
+        } finally {
+            pushLock.unlock();
         }
-        String scrubbed = output.replace(System.getenv().getOrDefault("GITHUB_TOKEN", "\u0000\u0000\u0000"), "***");
-        if (process.exitValue() != 0) {
-            log.warn("git command output: {}", scrubbed);
-        } else {
-            log.debug("git command output: {}", scrubbed);
+    }
+
+    @PreDestroy
+    public void pushOnShutdown() {
+        if (properties.isPushOnShutdown()) {
+            // Best effort: Render allows a short grace period after SIGTERM.
+            push("shutdown", true);
         }
-        return process.exitValue();
+    }
+
+    private boolean usable(String action) {
+        if (!properties.isEnabled()) {
+            return false;
+        }
+        if (!github.isConfigured()) {
+            log.warn("DATA_REPO/DATA_REPO_TOKEN not set; skipping data sync {}", action);
+            return false;
+        }
+        if (!codec.hasKey()) {
+            log.warn("DATA_ENCRYPTION_KEY not set; skipping data sync {}", action);
+            return false;
+        }
+        return true;
     }
 }

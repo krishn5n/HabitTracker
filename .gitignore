@@ -1,3 +1,6 @@
 ### IDE ###
 .idea/
 .DS_Store
+
+### Local working database (durable copy lives in the private data repo) ###
+data/
