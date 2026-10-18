@@ -1,0 +1,12 @@
+target/
+data/
+.idea/
+.agents/
+plans/
+docs/
+*.iml
+.DS_Store
+.git/
+.gitignore
+.gitattributes
+HELP.md

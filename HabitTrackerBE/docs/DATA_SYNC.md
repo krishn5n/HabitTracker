@@ -87,6 +87,9 @@ Render.
 | `H2_CONSOLE_ENABLED` | `false` |
 | `JWT_SECRET`, `CORS_ALLOWED_ORIGINS` | as before |
 
+Exact formats, lengths and failure modes for every variable, plus the Render
+service settings, are in [RENDER_DEPLOY.md](RENDER_DEPLOY.md).
+
 Locally `DATA_SYNC_ENABLED` stays `false`: the app then uses the H2 file
 directly and never contacts GitHub.
 
