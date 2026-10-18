@@ -3,22 +3,23 @@ import "./ConsistencyCalendar.css";
 
 interface ConsistencyCalendarProps {
   data: ConsistencyResponse;
+  windowDays?: number;
 }
 
-function dateRange(start: string, end: string): string[] {
+function trailingDays(windowDays: number): string[] {
   const dates: string[] = [];
-  const cursor = new Date(`${start}T00:00:00`);
-  const last = new Date(`${end}T00:00:00`);
-  while (cursor <= last) {
+  const cursor = new Date();
+  cursor.setDate(cursor.getDate() - (windowDays - 1));
+  for (let i = 0; i < windowDays; i++) {
     dates.push(cursor.toISOString().slice(0, 10));
     cursor.setDate(cursor.getDate() + 1);
   }
   return dates;
 }
 
-export function ConsistencyCalendar({ data }: ConsistencyCalendarProps) {
+export function ConsistencyCalendar({ data, windowDays = 28 }: ConsistencyCalendarProps) {
   const byDate = new Map(data.entries.map((entry) => [entry.entryDate, entry.completed]));
-  const days = dateRange(data.windowStart, data.windowEnd);
+  const days = trailingDays(windowDays);
 
   return (
     <div className="consistency">

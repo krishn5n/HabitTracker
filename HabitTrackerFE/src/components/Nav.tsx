@@ -14,7 +14,7 @@ export function Nav() {
   return (
     <header className="nav">
       <div className="nav__bar">
-        <span className="nav__wordmark">Almanac</span>
+        <span className="nav__wordmark">Nitya</span>
         {session && (
           <button type="button" className="btn btn--ghost btn--sm" onClick={signOut}>
             Sign out

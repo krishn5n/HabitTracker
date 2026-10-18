@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { api, ApiError } from "../lib/api";
-import type { DashboardResponse, EntryResponse, HabitFieldResponse, HabitResponse } from "../lib/types";
-import { HabitCard } from "../components/HabitCard";
-import { StatTile } from "../components/StatTile";
+import type { DashboardField, DashboardResponse, HabitFieldResponse, HabitResponse } from "../lib/types";
+import { HabitTile, fieldStatus } from "../components/HabitTile";
+import { HabitGroupTile } from "../components/HabitGroupTile";
+import { SummaryRow } from "../components/SummaryRow";
 import { EmptyState } from "../components/EmptyState";
 import { CreateHabitModal } from "../components/CreateHabitModal";
 import "./DashboardPage.css";
@@ -36,27 +37,6 @@ export function DashboardPage() {
     };
   }, [push]);
 
-  function handleFieldLogged(habitFieldSeqId: number, entry: EntryResponse) {
-    setData((current) => {
-      if (!current) return current;
-      return {
-        habits: current.habits.map((habit) => ({
-          ...habit,
-          fields: habit.fields.map((field) =>
-            field.habitFieldSeqId === habitFieldSeqId
-              ? {
-                  ...field,
-                  completedToday: entry.completed,
-                  todayValue: entry.entryValue,
-                  updatedAt: entry.updatedAt,
-                }
-              : field,
-          ),
-        })),
-      };
-    });
-  }
-
   function handleCreated(habit: HabitResponse, field: HabitFieldResponse) {
     setData((current) => ({
       habits: [
@@ -81,8 +61,10 @@ export function DashboardPage() {
     }));
   }
 
-  const totalFields = data?.habits.flatMap((h) => h.fields).length ?? 0;
-  const completedFields = data?.habits.flatMap((h) => h.fields).filter((f) => f.completedToday).length ?? 0;
+  const allFields: DashboardField[] = data?.habits.flatMap((h) => h.fields) ?? [];
+  const achieved = allFields.filter((f) => fieldStatus(f) === "achieved").length;
+  const partial = allFields.filter((f) => fieldStatus(f) === "partial").length;
+  const empty = allFields.filter((f) => fieldStatus(f) === "empty").length;
   const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
 
   return (
@@ -111,12 +93,18 @@ export function DashboardPage() {
       )}
 
       {status === "ready" && data && data.habits.length > 0 && (
-        <div className="dashboard__grid">
-          <StatTile value={completedFields} total={totalFields} label="Habits logged today" />
-          {data.habits.map((habit) => (
-            <HabitCard key={habit.habitSeqId} habit={habit} onFieldLogged={handleFieldLogged} />
-          ))}
-        </div>
+        <>
+          <SummaryRow achieved={achieved} partial={partial} empty={empty} />
+          <div className="dashboard__grid">
+            {data.habits.map((habit) =>
+              habit.fields.length > 1 ? (
+                <HabitGroupTile key={habit.habitSeqId} habit={habit} />
+              ) : (
+                <HabitTile key={habit.habitSeqId} habitSeqId={habit.habitSeqId} field={habit.fields[0]} wide />
+              ),
+            )}
+          </div>
+        </>
       )}
 
       {session && (

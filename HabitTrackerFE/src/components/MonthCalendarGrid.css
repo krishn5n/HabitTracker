@@ -1,0 +1,84 @@
+.month-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.month-grid__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.month-grid__label {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+}
+
+.month-grid__weekdays,
+.month-grid__days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-2xs);
+}
+
+.month-grid__weekday {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.month-grid__cell {
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  border-radius: var(--radius-sm);
+  padding: var(--space-2xs);
+}
+
+.month-grid__cell--blank {
+  visibility: hidden;
+}
+
+.month-grid__day {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.month-grid__day--achieved {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+.month-grid__day--partial {
+  border: 1px solid var(--color-ochre);
+  color: var(--color-ink);
+}
+
+.month-grid__day--empty {
+  color: var(--color-ink-2);
+}
+
+.month-grid__day--today {
+  outline: 1.5px dashed var(--color-rule-2);
+  outline-offset: 1px;
+}
+
+.month-grid__value {
+  font-size: 0.625rem;
+  color: var(--color-muted);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

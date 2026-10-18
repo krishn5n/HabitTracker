@@ -22,12 +22,22 @@ export function HabitDetailPage() {
     api
       .get<HabitResponse>(`/api/habits/${habitSeqId}`)
       .then(setHabit)
-      .catch((err) => push({ tone: "error", message: err instanceof ApiError ? err.detail : "Couldn't load that habit." }));
+      .catch((err) => {
+        if (err instanceof ApiError && (err.status === 403 || err.status === 404)) {
+          push({ tone: "error", message: "That habit wasn't found." });
+          navigate("/habits");
+          return;
+        }
+        push({ tone: "error", message: err instanceof ApiError ? err.detail : "Couldn't load that habit." });
+      });
     api
       .get<Page<HabitFieldResponse>>(`/api/habits/${habitSeqId}/fields`, { size: 50 })
       .then((res) => setFields(res.content))
-      .catch((err) => push({ tone: "error", message: err instanceof ApiError ? err.detail : "Couldn't load its fields." }));
-  }, [habitSeqId, push]);
+      .catch((err) => {
+        if (err instanceof ApiError && (err.status === 403 || err.status === 404)) return;
+        push({ tone: "error", message: err instanceof ApiError ? err.detail : "Couldn't load its fields." });
+      });
+  }, [habitSeqId, navigate, push]);
 
   async function handleDeleteField(field: HabitFieldResponse) {
     try {

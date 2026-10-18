@@ -8,6 +8,7 @@ import { RegisterPage } from "./pages/RegisterPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { HabitsPage } from "./pages/HabitsPage";
 import { HabitDetailPage } from "./pages/HabitDetailPage";
+import { FieldDetailPage } from "./pages/FieldDetailPage";
 import { SettingsPage } from "./pages/SettingsPage";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -46,6 +47,14 @@ export function App() {
             element={
               <ProtectedRoute>
                 <HabitDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/habits/:habitSeqId/fields/:habitFieldSeqId"
+            element={
+              <ProtectedRoute>
+                <FieldDetailPage />
               </ProtectedRoute>
             }
           />

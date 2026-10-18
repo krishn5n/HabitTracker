@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/modernist-4cacb983-3ca1-4389-9c8c-0798c1be093a/styles.css">
+<script src="_ds/modernist-4cacb983-3ca1-4389-9c8c-0798c1be093a/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;background:#1a1310;color:#f4ede8;font-family:"Fraunces",Georgia,serif;-webkit-font-smoothing:antialiased}
+a{color:#5b9bff;text-decoration:none}a:hover{color:#8ab8ff}
+input,button,h1,h2,h3,label{font-family:"Fraunces",Georgia,serif}
+input::placeholder{color:#7d6f67}
+*:focus-visible{outline:2px solid #5b9bff;outline-offset:2px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:.45}50%{opacity:.9}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:32px 16px;box-sizing:border-box;background:#120d0b">
+<div style="position:relative;width:390px;height:844px;flex-shrink:0;background:#1a1310;border:1px solid #3a2e28;border-radius:48px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 0 0 8px #0b0807">
+
+  <div style="height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;font-size:16px;font-weight:600">
+    <span>9:41</span>
+    <div style="display:flex;gap:8px;align-items:center">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="#f4ede8"><rect x="0" y="8" width="3" height="4"></rect><rect x="5" y="5" width="3" height="7"></rect><rect x="10" y="2" width="3" height="10"></rect><rect x="15" y="0" width="3" height="12"></rect></svg>
+      <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x="0.5" y="0.5" width="22" height="11" stroke="#f4ede8"></rect><rect x="2" y="2" width="17" height="8" fill="#f4ede8"></rect><rect x="24" y="4" width="2" height="4" fill="#f4ede8"></rect></svg>
+    </div>
+  </div>
+
+  <sc-if value="{{ isDash }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:32px;padding:16px 16px 32px">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <span style="font-size:14px;line-height:20px;color:#b3a69e">Saturday, 17 October</span>
+          <h1 style="margin:0;font-size:32px;line-height:40px;font-weight:700;letter-spacing:-0.01em;color:#f4ede8">Today</h1>
+        </div>
+        <button onClick="{{ openNew }}" style="display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;background:#5b9bff;color:#0d0907;border:none;font-weight:700;font-size:14px;line-height:20px;cursor:pointer;transition:transform .1s,background .15s" style-hover="background:#74abff" style-active="transform:scale(0.96);background:#3f82f0">
+          New habit
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M12 5v14M5 12h14"></path></svg>
+        </button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:2px solid #f4ede8;padding-top:16px">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <span style="font-size:32px;line-height:40px;font-weight:700;color:#3ddc84">{{ sumDone }}</span>
+          <span style="font-size:12px;line-height:16px;color:#b3a69e;letter-spacing:0.04em;text-transform:uppercase">Achieved</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;padding-left:16px;border-left:1px solid #3a2e28">
+          <span style="font-size:32px;line-height:40px;font-weight:700">{{ sumProgress }}</span>
+          <span style="font-size:12px;line-height:16px;color:#b3a69e;letter-spacing:0.04em;text-transform:uppercase">Partial</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;padding-left:16px;border-left:1px solid #3a2e28">
+          <span style="font-size:32px;line-height:40px;font-weight:700;color:#b3a69e">{{ sumEmpty }}</span>
+          <span style="font-size:12px;line-height:16px;color:#b3a69e;letter-spacing:0.04em;text-transform:uppercase">Not logged</span>
+        </div>
+      </div>
+
+      <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">{{ skeleton }}</div>
+      </sc-if>
+      <sc-if value="{{ loaded }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+          <sc-for list="{{ habits }}" as="h" hint-placeholder-count="5">
+            <sc-if value="{{ h.isGroup }}" hint-placeholder-val="{{ false }}">
+              <div style="grid-column:span 2;border:1px solid #2f7d52;padding:8px;display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px">
+                  <span style="font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#f4ede8">{{ h.name }}</span>
+                  <span style="font-size:12px;line-height:16px;color:#b3a69e">{{ h.countText }}</span>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+                  <sc-for list="{{ h.fields }}" as="f" hint-placeholder-count="2">
+                    <div onClick="{{ f.open }}" style="background:#261d19;padding:16px;min-height:176px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;gap:16px;cursor:pointer;transition:background .15s" style-hover="background:#2d221d" style-active="background:#352822">
+                      <span style="font-size:16px;line-height:24px;font-weight:600;color:#f4ede8">{{ f.name }}</span>
+                      <div style="display:flex;flex-direction:column;gap:8px">
+                        <div style="display:flex;align-items:baseline;gap:4px">
+                          <span style="font-size:32px;line-height:40px;font-weight:700;color:{{ f.valueColor }}">{{ f.todayText }}</span>
+                          <span style="font-size:14px;line-height:20px;color:#b3a69e">{{ f.unitText }}</span>
+                        </div>
+                        <sc-if value="{{ f.hasGoal }}" hint-placeholder-val="{{ false }}">
+                          <div style="height:4px;background:#3a2e28;position:relative"><div style="position:absolute;left:0;top:0;bottom:0;width:{{ f.pct }};background:{{ f.barColor }};transition:width .4s"></div></div>
+                        </sc-if>
+                        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px">
+                          <span style="font-size:12px;line-height:16px;color:#b3a69e">{{ f.goalText }}</span>
+                          <span style="font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:{{ f.statusColor }}">{{ f.statusText }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ h.isSingle }}" hint-placeholder-val="{{ true }}">
+              <div onClick="{{ h.f.open }}" style="grid-column:span {{ h.span }};background:#261d19;padding:16px;min-height:{{ h.minH }};box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;gap:16px;cursor:pointer;transition:background .15s" style-hover="background:#2d221d" style-active="background:#352822">
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <span style="font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#b3a69e">{{ h.name }}</span>
+                  <span style="font-size:16px;line-height:24px;font-weight:600;color:#f4ede8">{{ h.f.name }}</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="display:flex;align-items:baseline;gap:4px;min-width:0">
+                    <span style="font-size:32px;line-height:40px;font-weight:700;color:{{ h.f.valueColor }};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ h.f.todayText }}</span>
+                    <span style="font-size:14px;line-height:20px;color:#b3a69e">{{ h.f.unitText }}</span>
+                  </div>
+                  <sc-if value="{{ h.f.hasGoal }}" hint-placeholder-val="{{ false }}">
+                    <div style="height:4px;background:#3a2e28;position:relative"><div style="position:absolute;left:0;top:0;bottom:0;width:{{ h.f.pct }};background:{{ h.f.barColor }};transition:width .4s"></div></div>
+                  </sc-if>
+                  <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px">
+                    <span style="font-size:12px;line-height:16px;color:#b3a69e">{{ h.f.goalText }}</span>
+                    <span style="font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:{{ h.f.statusColor }}">{{ h.f.statusText }}</span>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="height:84px;flex-shrink:0;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #3a2e28;background:#1a1310;padding:0 16px 24px;box-sizing:border-box">
+      <button style="display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;background:none;border:none;border-top:2px solid #f4ede8;margin-top:-1px;color:#f4ede8;font-weight:700;font-size:12px;line-height:16px;cursor:pointer;padding:8px 0">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 3 3 5-6"></path></svg>Habits
+      </button>
+      <button onClick="{{ tabSoon }}" style="display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;background:none;border:none;color:#b3a69e;font-weight:600;font-size:12px;line-height:16px;cursor:pointer;padding:8px 0 8px 16px" style-active="color:#f4ede8">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13"></rect><path d="M3 10h18M7 15h4"></path></svg>Expenses
+      </button>
+      <button onClick="{{ tabSoon }}" style="display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;background:none;border:none;color:#b3a69e;font-weight:600;font-size:12px;line-height:16px;cursor:pointer;padding:8px 0 8px 16px" style-active="color:#f4ede8">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>Profile
+      </button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+    <div onScroll="{{ onDetailScroll }}" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:24px;padding:8px 16px 32px">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <button onClick="{{ goBack }}" style="display:flex;align-items:center;gap:4px;align-self:flex-start;height:44px;padding:0;background:none;border:none;color:#5b9bff;font-weight:600;font-size:16px;line-height:24px;cursor:pointer" style-active="opacity:.6">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="m15 18-6-6 6-6"></path></svg>Today
+        </button>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <span style="font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#b3a69e">{{ d.habitName }}</span>
+          <h1 style="margin:0;font-size:32px;line-height:40px;font-weight:700;letter-spacing:-0.01em;color:#f4ede8">{{ d.name }}</h1>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:2px solid #f4ede8;padding-top:16px">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <span style="font-size:24px;line-height:32px;font-weight:700">{{ d.streak }}</span>
+          <span style="font-size:12px;line-height:16px;color:#b3a69e;letter-spacing:0.04em;text-transform:uppercase">Day streak</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;padding-left:16px;border-left:1px solid #3a2e28">
+          <span style="font-size:24px;line-height:32px;font-weight:700">{{ d.rate }}</span>
+          <span style="font-size:12px;line-height:16px;color:#b3a69e;letter-spacing:0.04em;text-transform:uppercase">Last 4 wks</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;padding-left:16px;border-left:1px solid #3a2e28">
+          <span style="font-size:24px;line-height:32px;font-weight:700">{{ d.goalShort }}</span>
+          <span style="font-size:12px;line-height:16px;color:#b3a69e;letter-spacing:0.04em;text-transform:uppercase">{{ d.goalLabel }}</span>
+        </div>
+      </div>
+
+      <div style="position:relative;display:grid;grid-template-columns:1fr 1fr;background:#261d19;padding:4px">
+        <div style="position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);background:#f4ede8;transform:translateX({{ tabX }});transition:transform .3s cubic-bezier(.2,.8,.2,1)"></div>
+        <button onClick="{{ showCal }}" style="position:relative;height:40px;padding:0 16px;text-align:left;border:none;background:none;color:{{ calFg }};font-weight:700;font-size:14px;line-height:20px;cursor:pointer;transition:color .3s">Calendar</button>
+        <button onClick="{{ showHist }}" style="position:relative;height:40px;padding:0 16px;text-align:left;border:none;background:none;color:{{ histFg }};font-weight:700;font-size:14px;line-height:20px;cursor:pointer;transition:color .3s">History</button>
+      </div>
+
+      <sc-if value="{{ isCal }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:20px;line-height:28px;font-weight:600">{{ monthLabel }}</span>
+            <div style="display:flex;gap:4px">
+              <button onClick="{{ prevMonth }}" disabled="{{ prevDisabled }}" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:#f4ede8;cursor:pointer;opacity:{{ prevOpacity }}" style-active="background:#261d19">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="m15 18-6-6 6-6"></path></svg>
+              </button>
+              <button onClick="{{ nextMonth }}" disabled="{{ nextDisabled }}" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:#f4ede8;cursor:pointer;opacity:{{ nextOpacity }}" style-active="background:#261d19">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="m9 18 6-6-6-6"></path></svg>
+              </button>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr))">
+            <sc-for list="{{ weekdays }}" as="w" hint-placeholder-count="7">
+              <span style="height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:16px;font-weight:600;color:#b3a69e">{{ w }}</span>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));row-gap:8px">
+            <sc-for list="{{ cells }}" as="c" hint-placeholder-count="35">
+              <div style="height:64px;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <span style="width:40px;height:40px;border-radius:50%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:20px;font-weight:{{ c.weight }};color:{{ c.color }};background:{{ c.fill }};border:{{ c.border }}">{{ c.label }}</span>
+                <span style="font-size:12px;line-height:16px;font-weight:600;color:{{ c.valueColor }};max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:16px;padding-top:16px;border-top:1px solid #3a2e28;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;line-height:16px;color:#b3a69e"><span style="width:12px;height:12px;border-radius:50%;background:#5b9bff"></span>{{ legendMet }}</div>
+            <sc-if value="{{ d.hasGoal }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;line-height:16px;color:#b3a69e"><span style="width:12px;height:12px;border-radius:50%;border:1.5px solid #5b9bff;box-sizing:border-box"></span>Below goal</div>
+            </sc-if>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;line-height:16px;color:#b3a69e"><span style="width:12px;height:12px;border-radius:50%;border:1px dashed #6f625b;box-sizing:border-box"></span>Today</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isHist }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column">
+          <sc-for list="{{ history }}" as="e" hint-placeholder-count="6">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid #3a2e28">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <span style="font-size:16px;line-height:24px;font-weight:600">{{ e.date }}</span>
+                <span style="font-size:12px;line-height:16px;color:#b3a69e">{{ e.sub }}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px">
+                <span style="font-size:16px;line-height:24px;font-weight:700">{{ e.value }}</span>
+                <span style="width:12px;height:12px;border-radius:50%;box-sizing:border-box;background:{{ e.dotBg }};border:1.5px solid #5b9bff"></span>
+              </div>
+            </div>
+          </sc-for>
+          <div style="padding:16px 0;display:flex;align-items:center;gap:8px;min-height:44px;color:#b3a69e;font-size:12px;line-height:16px">
+            <sc-if value="{{ histLoadingRow }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:8px">{{ histSpinner }}<span>Loading older entries…</span></div>
+            </sc-if>
+            <sc-if value="{{ histEnd }}" hint-placeholder-val="{{ false }}">
+              <span>{{ histEndLabel }}</span>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="flex-shrink:0;display:flex;flex-direction:column;gap:8px;padding:16px 16px 32px;border-top:1px solid #3a2e28;background:#1a1310">
+      <button onClick="{{ openLog }}" style="display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 16px;background:#5b9bff;color:#0d0907;border:none;font-weight:700;font-size:16px;line-height:24px;cursor:pointer;transition:transform .1s,background .15s" style-hover="background:#74abff" style-active="transform:scale(0.98);background:#3f82f0">
+        {{ logLabel }}
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M12 5v14M5 12h14"></path></svg>
+      </button>
+    </div>
+  </sc-if>
+
+  <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;background:rgba(10,6,5,0.72);opacity:{{ backdropOpacity }};pointer-events:{{ backdropEvents }};transition:opacity .25s"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#261d19;box-shadow:0 -24px 64px rgba(0,0,0,0.55);transform:translateY({{ sheetY }});transition:transform .3s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;gap:24px;padding:12px 16px 40px">
+    <span style="align-self:center;width:40px;height:4px;background:#4a3c35"></span>
+    <sc-if value="{{ isLogSheet }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:24px">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <span style="font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#b3a69e">Log · Sat 17 Oct</span>
+          <h2 style="margin:0;font-size:24px;line-height:32px;font-weight:700;color:#f4ede8">{{ d.name }}</h2>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label style="font-size:14px;line-height:20px;font-weight:600;color:#f4ede8">{{ d.inputLabel }}</label>
+          <sc-if value="{{ d.isBool }}" hint-placeholder-val="{{ false }}">
+            <div style="position:relative;display:grid;grid-template-columns:1fr 1fr;background:#1a1310;padding:4px">
+              <div style="position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);background:#f4ede8;transform:translateX({{ boolX }});transition:transform .3s cubic-bezier(.2,.8,.2,1)"></div>
+              <button onClick="{{ setYes }}" style="position:relative;height:44px;padding:0 16px;text-align:left;border:none;background:none;color:{{ yesFg }};font-weight:700;font-size:16px;line-height:24px;cursor:pointer;transition:color .3s">Done</button>
+              <button onClick="{{ setNo }}" style="position:relative;height:44px;padding:0 16px;text-align:left;border:none;background:none;color:{{ noFg }};font-weight:700;font-size:16px;line-height:24px;cursor:pointer;transition:color .3s">Not today</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ d.isInput }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;align-items:center;height:52px;border:2px solid {{ logBorder }};background:#1a1310;padding:0 16px;gap:8px">
+              <input value="{{ logValue }}" onChange="{{ onLogChange }}" inputMode="{{ d.inputMode }}" placeholder="{{ d.placeholder }}" style="flex:1;min-width:0;background:none;border:none;outline:none;color:#f4ede8;font-size:20px;line-height:28px;font-weight:700"></input>
+              <span style="font-size:14px;line-height:20px;color:#b3a69e">{{ d.unit }}</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ logError }}" hint-placeholder-val="{{ false }}">
+            <span style="font-size:14px;line-height:20px;color:#ff7a6e">{{ logError }}</span>
+          </sc-if>
+          <sc-if value="{{ logHint }}" hint-placeholder-val="{{ false }}">
+            <span style="font-size:14px;line-height:20px;color:#b3a69e">{{ logHint }}</span>
+          </sc-if>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button onClick="{{ closeSheet }}" style="height:52px;padding:0 16px;text-align:left;background:none;border:2px solid #ff7a6e;color:#ff7a6e;font-weight:700;font-size:16px;line-height:24px;cursor:pointer;transition:background .15s,transform .1s" style-hover="background:rgba(255,122,110,0.1)" style-active="transform:scale(0.98);background:rgba(255,122,110,0.18)">Cancel</button>
+          <button onClick="{{ saveLog }}" style="display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 16px;background:#5b9bff;color:#0d0907;border:none;font-weight:700;font-size:16px;line-height:24px;cursor:pointer;opacity:{{ saveOpacity }};transition:transform .1s,background .15s" style-hover="background:#74abff" style-active="transform:scale(0.98);background:#3f82f0">{{ saveLabel }}{{ saveSpinner }}</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isNewSheet }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:24px">
+        <h2 style="margin:0;font-size:24px;line-height:32px;font-weight:700;color:#f4ede8">New habit</h2>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label style="font-size:14px;line-height:20px;font-weight:600">Name</label>
+          <input value="{{ nName }}" onChange="{{ onName }}" placeholder="e.g. Cold shower" style="height:52px;box-sizing:border-box;padding:0 16px;background:#1a1310;border:2px solid {{ nameBorder }};outline:none;color:#f4ede8;font-size:16px;line-height:24px"></input>
+          <sc-if value="{{ nameError }}" hint-placeholder-val="{{ false }}">
+            <span style="font-size:14px;line-height:20px;color:#ff7a6e">{{ nameError }}</span>
+          </sc-if>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label style="font-size:14px;line-height:20px;font-weight:600">Tracks</label>
+          <div style="position:relative;display:grid;grid-template-columns:repeat(4,1fr);background:#1a1310;padding:4px">
+            <div style="position:absolute;top:4px;bottom:4px;left:4px;width:calc(25% - 2px);background:#f4ede8;transform:translateX({{ typeX }});transition:transform .32s cubic-bezier(.2,.8,.2,1)"></div>
+            <sc-for list="{{ typeOpts }}" as="t" hint-placeholder-count="4">
+              <button onClick="{{ t.pick }}" style="position:relative;height:40px;padding:0 8px;text-align:left;border:none;background:none;color:{{ t.fg }};font-weight:700;font-size:12px;line-height:16px;cursor:pointer;transition:color .3s">{{ t.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <label style="font-size:14px;line-height:20px;font-weight:600">Unit</label>
+            <input value="{{ nUnit }}" onChange="{{ onUnit }}" disabled="{{ goalDisabled }}" placeholder="reps" style="height:52px;box-sizing:border-box;padding:0 16px;background:#1a1310;border:2px solid #3a2e28;outline:none;color:#f4ede8;font-size:16px;line-height:24px;opacity:{{ goalOpacity }};min-width:0"></input>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <label style="font-size:14px;line-height:20px;font-weight:600">Daily goal</label>
+            <input value="{{ nGoal }}" onChange="{{ onGoal }}" disabled="{{ goalDisabled }}" inputMode="decimal" placeholder="Optional" style="height:52px;box-sizing:border-box;padding:0 16px;background:#1a1310;border:2px solid {{ goalBorder }};outline:none;color:#f4ede8;font-size:16px;line-height:24px;opacity:{{ goalOpacity }};min-width:0"></input>
+          </div>
+        </div>
+        <span style="font-size:14px;line-height:20px;color:{{ goalMsgColor }};margin-top:-16px">{{ goalMsg }}</span>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button onClick="{{ closeSheet }}" style="height:52px;padding:0 16px;text-align:left;background:none;border:2px solid #ff7a6e;color:#ff7a6e;font-weight:700;font-size:16px;line-height:24px;cursor:pointer;transition:background .15s,transform .1s" style-hover="background:rgba(255,122,110,0.1)" style-active="transform:scale(0.98);background:rgba(255,122,110,0.18)">Cancel</button>
+          <button onClick="{{ saveNew }}" style="display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 16px;background:#5b9bff;color:#0d0907;border:none;font-weight:700;font-size:16px;line-height:24px;cursor:pointer;opacity:{{ saveOpacity }};transition:transform .1s,background .15s" style-hover="background:#74abff" style-active="transform:scale(0.98);background:#3f82f0">{{ createLabel }}{{ saveSpinner }}</button>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="position:absolute;left:16px;right:16px;top:56px;display:flex;align-items:center;gap:12px;padding:12px 16px;background:#f4ede8;color:#1a1310;box-shadow:0 16px 40px rgba(0,0,0,0.5);transform:translateY({{ toastY }});opacity:{{ toastOpacity }};transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s;pointer-events:none">
+    <span style="width:24px;height:24px;flex-shrink:0;border-radius:50%;display:flex;align-items:center;justify-content:center;background:{{ toastAccent }};color:#0d0907">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square"><path d="M20 6 9 17l-5-5"></path></svg>
+    </span>
+    <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+      <span style="font-size:14px;line-height:20px;font-weight:700">{{ toastTitle }}</span>
+      <span style="font-size:12px;line-height:16px;color:#4a3c35">{{ toastSub }}</span>
+    </div>
+  </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const TODAY = new Date(2026, 9, 17);
+const DAY = 86400000;
+const PAGE = 10;
+const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const WD = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const fmtNum = v => { const n = Number(v); return Number.isFinite(n) ? String(Math.round(n*10)/10) : v; };
+const C = { blue: '#5b9bff', green: '#3ddc84', text: '#f4ede8', muted: '#b3a69e', dim: '#6f625b', ink: '#0d0907' };
+
+function seedData() {
+  const habits = [
+    { id: 1, name: 'Push ups', fields: [
+      { id: 11, name: 'Reps', type: 'NUMBER', unit: 'reps', goal: 20, today: '12' },
+      { id: 12, name: 'Plank hold', type: 'DURATION', unit: 'min', goal: 3, today: '3' } ] },
+    { id: 2, name: 'Drink water', fields: [
+      { id: 21, name: 'Glasses', type: 'NUMBER', unit: 'glasses', goal: 8, today: '8' } ] },
+    { id: 3, name: 'Reading', fields: [
+      { id: 31, name: 'Pages', type: 'NUMBER', unit: 'pages', goal: null, today: null } ] },
+    { id: 4, name: 'Meditate', fields: [
+      { id: 41, name: 'Morning sit', type: 'BOOLEAN', unit: '', goal: null, today: 'true' } ] },
+    { id: 5, name: 'Journal', fields: [
+      { id: 51, name: 'Gratitude note', type: 'TEXT', unit: '', goal: null, today: null } ] }
+  ];
+  let s = 7;
+  const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  const entries = {};
+  const notes = ['Calm', 'Family', 'Sunlight', 'Coffee', 'Run', 'Friends', 'Rain'];
+  habits.forEach(h => h.fields.forEach(f => {
+    const m = {};
+    for (let i = 1; i < 28; i++) {
+      if (rnd() < 0.2) continue;
+      const d = iso(new Date(TODAY.getTime() - i * DAY));
+      let v;
+      if (f.type === 'BOOLEAN') v = rnd() < 0.85 ? 'true' : 'false';
+      else if (f.type === 'TEXT') v = notes[Math.floor(rnd() * notes.length)];
+      else if (f.goal) v = String(Math.round(f.goal * (0.65 + rnd() * 0.6) * (f.type === 'DURATION' ? 2 : 1)) / (f.type === 'DURATION' ? 2 : 1));
+      else v = String(Math.round(10 + rnd() * 30));
+      m[d] = v;
+    }
+    if (f.today != null) m[iso(TODAY)] = f.today;
+    entries[f.id] = m;
+  }));
+  return { habits, entries };
+}
+
+class Component extends DCLogic {
+  state = Object.assign(seedData(), {
+    screen: 'dash', fieldId: null, loading: true, tab: 'cal',
+    month: 9, sheet: null, logValue: '', logError: '', saving: false,
+    histCount: PAGE, histLoading: false,
+    nName: '', nType: 'NUMBER', nUnit: '', nGoal: '', nameError: '', goalError: '',
+    toast: null
+  });
+
+  componentDidMount() { this._t = setTimeout(() => this.setState({ loading: false }), 1100); }
+  componentWillUnmount() { clearTimeout(this._t); clearTimeout(this._toastT); clearTimeout(this._histT); }
+
+  isDone(f, v) {
+    if (v == null) return null;
+    if (f.type === 'BOOLEAN') return v === 'true';
+    if (f.goal == null) return true;
+    return Number(v) >= f.goal;
+  }
+  showVal(f, v) {
+    if (v == null) return '';
+    if (f.type === 'BOOLEAN') return v === 'true' ? 'Done' : 'Skipped';
+    if (f.type === 'TEXT') return v;
+    return fmtNum(v);
+  }
+  findField(id) {
+    for (const h of this.state.habits) for (const f of h.fields) if (f.id === id) return { h, f };
+    return null;
+  }
+  toast(title, sub, kind) {
+    clearTimeout(this._toastT);
+    this.setState({ toast: { title, sub, kind } });
+    this._toastT = setTimeout(() => this.setState({ toast: null }), 2600);
+  }
+  loadMoreHistory() {
+    const st = this.state;
+    if (st.histLoading || !st.fieldId) return;
+    const total = Object.keys(st.entries[st.fieldId]).length;
+    if (st.histCount >= total) return;
+    this.setState({ histLoading: true });
+    this._histT = setTimeout(() => this.setState(s => ({ histLoading: false, histCount: s.histCount + PAGE })), 700);
+  }
+
+  renderVals() {
+    const st = this.state;
+    const todayIso = iso(TODAY);
+    let done = 0, prog = 0, empty = 0;
+    const tile = (f) => {
+      const v = st.entries[f.id][todayIso];
+      const c = this.isDone(f, v);
+      const hasGoal = f.goal != null;
+      const logged = v != null;
+      const achieved = hasGoal && c;
+      const progress = hasGoal && logged && !c;
+      if (achieved || (!hasGoal && logged)) done++; else if (progress) prog++; else empty++;
+      const pct = hasGoal && logged ? Math.min(100, Number(v) / f.goal * 100) : 0;
+      return {
+        name: f.name,
+        todayText: logged ? this.showVal(f, v) : '—',
+        unitText: logged && f.unit ? f.unit : '',
+        valueColor: logged ? C.text : C.dim,
+        goalText: hasGoal ? `Goal ${fmtNum(f.goal)} ${f.unit}` : 'No goal',
+        hasGoal, pct: pct + '%', barColor: achieved ? C.green : C.blue,
+        statusText: achieved ? '✓ Achieved' : progress ? `${fmtNum(f.goal - Number(v))} to go` : logged ? '✓ Logged' : 'Not logged',
+        statusColor: achieved || (!hasGoal && logged) ? C.green : progress ? C.text : C.muted,
+        open: () => { this.setState({ screen: 'detail', fieldId: f.id, tab: 'cal', month: 9, histCount: PAGE, histLoading: false }); }
+      };
+    };
+    const spans = [2, 1, 1, 2, 1, 1];
+    let si = 0;
+    const habits = st.habits.map(h => {
+      const fields = h.fields.map(tile);
+      if (h.fields.length > 1) {
+        const hd = h.fields.filter(f => this.isDone(f, st.entries[f.id][todayIso])).length;
+        return { isGroup: true, isSingle: false, name: h.name, countText: `${hd} of ${h.fields.length} done`, fields };
+      }
+      const span = spans[si++ % spans.length];
+      return { isGroup: false, isSingle: true, name: h.name, f: fields[0], span, minH: span === 2 ? '144px' : '200px' };
+    });
+
+    const skeleton = [2, 1, 1].map((sp, i) => React.createElement('div', { key: i, style: { gridColumn: `span ${sp}`, height: sp === 2 ? 176 : 200, background: '#261d19', animation: `pulse 1.2s ease-in-out ${i * 0.15}s infinite` } }));
+    const spinner = st.saving || st.histLoading ? React.createElement('span', { style: { width: 16, height: 16, border: '2px solid currentColor', borderRightColor: 'transparent', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block', flexShrink: 0 } }) : null;
+
+    const sel = st.fieldId ? this.findField(st.fieldId) : null;
+    let d = {}, cells = [], history = [], histMore = false, histEndLabel = '';
+    if (sel) {
+      const { h, f } = sel;
+      const em = st.entries[f.id];
+      let streak = 0;
+      for (let i = em[todayIso] != null ? 0 : 1; i < 60; i++) {
+        if (this.isDone(f, em[iso(new Date(TODAY.getTime() - i * DAY))])) streak++; else break;
+      }
+      let hit = 0;
+      for (let i = 0; i < 28; i++) if (this.isDone(f, em[iso(new Date(TODAY.getTime() - i * DAY))])) hit++;
+      const isBool = f.type === 'BOOLEAN';
+      d = {
+        habitName: h.name, name: f.name, streak, rate: Math.round(hit / 28 * 100) + '%',
+        goalShort: f.goal != null ? fmtNum(f.goal) : '—',
+        goalLabel: f.goal != null ? `Goal · ${f.unit}` : 'No goal',
+        hasGoal: f.goal != null, isBool, isInput: !isBool, unit: f.unit,
+        inputMode: f.type === 'TEXT' ? 'text' : 'decimal',
+        placeholder: f.type === 'TEXT' ? 'Write a few words' : '0',
+        inputLabel: isBool ? 'Did you do it today?' : f.type === 'TEXT' ? 'Entry' : `Value${f.unit ? ' (' + f.unit + ')' : ''}`
+      };
+      const first = new Date(2026, st.month, 1);
+      const daysIn = new Date(2026, st.month + 1, 0).getDate();
+      for (let i = 0; i < first.getDay(); i++) cells.push({ label: '', color: 'transparent', fill: 'transparent', border: 'none', weight: 400, value: '', valueColor: 'transparent' });
+      for (let day = 1; day <= daysIn; day++) {
+        const dt = new Date(2026, st.month, day);
+        const k = iso(dt);
+        const v = em[k];
+        const c = this.isDone(f, v);
+        const future = dt > TODAY;
+        const isToday = k === todayIso;
+        let val = '';
+        if (v != null) val = f.type === 'BOOLEAN' ? (v === 'true' ? 'Done' : 'Skip') : f.type === 'TEXT' ? 'Note' : fmtNum(v);
+        const met = v != null && c, missed = v != null && !c;
+        cells.push({
+          label: day, weight: isToday || met ? 700 : 500,
+          color: met ? C.ink : future ? '#5a4d46' : C.text,
+          fill: met ? C.blue : 'transparent',
+          border: missed ? `1.5px solid ${C.blue}` : isToday && !met ? `1px dashed ${C.muted}` : 'none',
+          value: val, valueColor: met || missed ? C.text : 'transparent'
+        });
+      }
+      const keys = Object.keys(em).sort().reverse();
+      history = keys.slice(0, st.histCount).map(k => {
+        const dt = new Date(k + 'T00:00:00');
+        const v = em[k];
+        const c = this.isDone(f, v);
+        return {
+          date: k === todayIso ? 'Today' : `${WD[dt.getDay()]} ${dt.getDate()} ${MONTHS[dt.getMonth()].slice(0,3)}`,
+          sub: f.goal != null ? (c ? 'Goal achieved' : `Below goal of ${fmtNum(f.goal)}`) : (f.type === 'BOOLEAN' ? (c ? 'Completed' : 'Skipped') : 'Logged'),
+          value: this.showVal(f, v) + (f.unit && f.type !== 'BOOLEAN' && f.type !== 'TEXT' ? ' ' + f.unit : ''),
+          dotBg: c ? C.blue : 'transparent'
+        };
+      });
+      histMore = keys.length > st.histCount;
+      const oldest = keys[keys.length - 1];
+      if (oldest) { const od = new Date(oldest + 'T00:00:00'); histEndLabel = `Start of history · ${od.getDate()} ${MONTHS[od.getMonth()].slice(0,3)} ${od.getFullYear()}`; }
+      else histEndLabel = 'No entries yet';
+    }
+
+    const sel2 = sel ? sel.f : null;
+    const openSheet = st.sheet != null;
+    const types = ['NUMBER','DURATION','BOOLEAN','TEXT'];
+    const typeOpts = [['NUMBER','Number'],['DURATION','Duration'],['BOOLEAN','Yes / No'],['TEXT','Text']].map(([k, label]) => ({
+      label, fg: st.nType === k ? C.ink : C.muted,
+      pick: () => this.setState({ nType: k, goalError: '', ...(k === 'BOOLEAN' || k === 'TEXT' ? { nGoal: '', nUnit: '' } : {}) })
+    }));
+    const goalDisabled = st.nType === 'BOOLEAN' || st.nType === 'TEXT';
+    const loggedToday = sel2 && st.entries[sel2.id][todayIso] != null;
+
+    return {
+      isDash: st.screen === 'dash', isDetail: st.screen === 'detail',
+      loading: st.loading, loaded: !st.loading, skeleton,
+      sumDone: st.loading ? '–' : done, sumProgress: st.loading ? '–' : prog, sumEmpty: st.loading ? '–' : empty,
+      habits,
+      openNew: () => this.setState({ sheet: 'new', nName: '', nType: 'NUMBER', nUnit: '', nGoal: '', nameError: '', goalError: '' }),
+      tabSoon: () => this.toast('Expenses is next', 'Only the habit section is designed so far.', 'info'),
+      goBack: () => this.setState({ screen: 'dash' }),
+      d, cells, weekdays: WD.map(w => w[0]),
+      monthLabel: `${MONTHS[st.month]} 2026`,
+      prevDisabled: st.month <= 8, nextDisabled: st.month >= 9,
+      prevOpacity: st.month <= 8 ? 0.3 : 1, nextOpacity: st.month >= 9 ? 0.3 : 1,
+      prevMonth: () => this.setState(s => ({ month: Math.max(8, s.month - 1) })),
+      nextMonth: () => this.setState(s => ({ month: Math.min(9, s.month + 1) })),
+      isCal: st.tab === 'cal', isHist: st.tab === 'hist',
+      tabX: st.tab === 'cal' ? '0%' : '100%',
+      calFg: st.tab === 'cal' ? C.ink : C.muted, histFg: st.tab === 'hist' ? C.ink : C.muted,
+      showCal: () => this.setState({ tab: 'cal' }), showHist: () => this.setState({ tab: 'hist' }),
+      legendMet: d.hasGoal ? 'Goal met' : 'Logged',
+      history, histEnd: !histMore && !st.histLoading, histEndLabel,
+      histLoadingRow: st.histLoading, histSpinner: spinner,
+      onDetailScroll: e => {
+        if (st.tab !== 'hist') return;
+        const el = e.currentTarget;
+        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 120) this.loadMoreHistory();
+      },
+      logLabel: loggedToday ? "Update today's value" : "Log today's value",
+      openLog: () => {
+        const f = sel2; const em = st.entries[f.id];
+        const last = em[todayIso] ?? em[Object.keys(em).sort().reverse()[0]] ?? '';
+        this.setState({ sheet: 'log', logValue: f.type === 'BOOLEAN' ? (last || 'true') : (em[todayIso] ?? (f.type === 'TEXT' ? '' : last)), logError: '' });
+      },
+      closeSheet: () => !st.saving && this.setState({ sheet: null }),
+      backdropOpacity: openSheet ? 1 : 0, backdropEvents: openSheet ? 'auto' : 'none',
+      sheetY: openSheet ? '0%' : '105%',
+      isLogSheet: st.sheet === 'log', isNewSheet: st.sheet === 'new',
+      logValue: st.logValue, logError: st.logError,
+      logHint: !st.logError && sel2 && sel2.goal != null ? `Goal is ${fmtNum(sel2.goal)} ${sel2.unit}. Prefilled with your last value.` : '',
+      logBorder: st.logError ? '#ff7a6e' : '#3a2e28',
+      onLogChange: e => this.setState({ logValue: e.target.value, logError: '' }),
+      boolX: st.logValue === 'false' ? '100%' : '0%',
+      yesFg: st.logValue !== 'false' ? C.ink : C.muted, noFg: st.logValue === 'false' ? C.ink : C.muted,
+      setYes: () => this.setState({ logValue: 'true' }), setNo: () => this.setState({ logValue: 'false' }),
+      saveOpacity: st.saving ? 0.7 : 1,
+      saveSpinner: st.saving ? spinner : null,
+      saveLabel: st.saving ? 'Saving…' : 'Save entry',
+      createLabel: st.saving ? 'Creating…' : 'Create habit',
+      saveLog: () => {
+        if (st.saving) return;
+        const f = sel2; const v = String(st.logValue).trim();
+        if (!v) return this.setState({ logError: 'Enter a value to log today.' });
+        if (v.length > 255) return this.setState({ logError: 'Keep it under 255 characters.' });
+        if ((f.type === 'NUMBER' || f.type === 'DURATION') && !Number.isFinite(Number(v))) return this.setState({ logError: `entryValue must be numeric for a goal-based field: ${v}` });
+        this.setState({ saving: true });
+        setTimeout(() => {
+          this.setState(s => ({ saving: false, sheet: null, entries: { ...s.entries, [f.id]: { ...s.entries[f.id], [todayIso]: v } } }));
+          const c = this.isDone(f, v);
+          const shown = this.showVal(f, v) + (f.unit ? ' ' + f.unit : '');
+          if (f.goal != null) this.toast(c ? 'Goal achieved' : 'Entry saved', c ? `${shown} logged for today.` : `${shown} · ${fmtNum(f.goal - Number(v))} ${f.unit} to go.`, 'ok');
+          else this.toast('Entry saved', `${f.name} logged for today.`, 'ok');
+        }, 800);
+      },
+      typeOpts, typeX: (types.indexOf(st.nType) * 100) + '%',
+      nName: st.nName, nUnit: st.nUnit, nGoal: st.nGoal,
+      onName: e => this.setState({ nName: e.target.value, nameError: '' }),
+      onUnit: e => this.setState({ nUnit: e.target.value }),
+      onGoal: e => this.setState({ nGoal: e.target.value, goalError: '' }),
+      nameError: st.nameError, nameBorder: st.nameError ? '#ff7a6e' : '#3a2e28',
+      goalBorder: st.goalError ? '#ff7a6e' : '#3a2e28',
+      goalDisabled, goalOpacity: goalDisabled ? 0.45 : 1,
+      goalMsg: st.goalError || (goalDisabled ? 'Goals apply to Number and Duration only.' : 'Leave the goal empty to count any entry as done.'),
+      goalMsgColor: st.goalError ? '#ff7a6e' : C.muted,
+      saveNew: () => {
+        if (st.saving) return;
+        const name = st.nName.trim();
+        const errs = {};
+        if (!name) errs.nameError = 'Give the habit a name.';
+        else if (name.length > 100) errs.nameError = 'Keep the name under 100 characters.';
+        if (st.nGoal.trim() && !(Number(st.nGoal) > 0)) errs.goalError = 'Goal must be a number above 0.';
+        if (Object.keys(errs).length) return this.setState(errs);
+        this.setState({ saving: true });
+        setTimeout(() => {
+          const id = Date.now();
+          const goal = st.nGoal.trim() ? Number(st.nGoal) : null;
+          this.setState(s => ({
+            saving: false, sheet: null,
+            habits: [...s.habits, { id, name, fields: [{ id: id + 1, name, type: s.nType, unit: s.nUnit.trim(), goal, today: null }] }],
+            entries: { ...s.entries, [id + 1]: {} }
+          }));
+          this.toast('Habit created', `${name} is on today's list.`, 'ok');
+        }, 900);
+      },
+      toastY: st.toast ? '0' : '-160%', toastOpacity: st.toast ? 1 : 0,
+      toastTitle: st.toast ? st.toast.title : '', toastSub: st.toast ? st.toast.sub : '',
+      toastAccent: st.toast && st.toast.kind === 'ok' ? C.green : C.blue
+    };
+  }
+}
+</script>
+</body>
+</html>

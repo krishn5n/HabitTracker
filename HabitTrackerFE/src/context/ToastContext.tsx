@@ -35,18 +35,28 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toasts.map((toast) => (
           <div key={toast.id} className={`toast toast--${toast.tone}`}>
             <span className="toast__message">{toast.message}</span>
-            {toast.action && (
+            <span className="toast__actions">
+              {toast.action && (
+                <button
+                  type="button"
+                  className="toast__action"
+                  onClick={() => {
+                    toast.action?.run();
+                    dismiss(toast.id);
+                  }}
+                >
+                  {toast.action.label}
+                </button>
+              )}
               <button
                 type="button"
-                className="toast__action"
-                onClick={() => {
-                  toast.action?.run();
-                  dismiss(toast.id);
-                }}
+                className="toast__close"
+                onClick={() => dismiss(toast.id)}
+                aria-label="Dismiss"
               >
-                {toast.action.label}
+                ×
               </button>
-            )}
+            </span>
           </div>
         ))}
       </div>

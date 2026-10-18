@@ -17,24 +17,29 @@ export function FieldPanel({ field, onEdit, onDelete }: FieldPanelProps) {
   const [latest, setLatest] = useState<EntryResponse | null>(null);
   const [consistency, setConsistency] = useState<ConsistencyResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
     setLatest(null);
     setConsistency(null);
-    api
+    setLoading(true);
+    const latestPromise = api
       .get<EntryResponse>(`/api/habit-fields/${field.habitFieldSeqId}/entries/latest`)
       .then((entry) => active && setLatest(entry))
       .catch((err) => {
         if (err instanceof ApiError && err.status === 404) return;
         if (active) setError(err instanceof ApiError ? err.detail : "Couldn't load the latest entry.");
       });
-    api
+    const consistencyPromise = api
       .get<ConsistencyResponse>(`/api/habit-fields/${field.habitFieldSeqId}/consistency`)
       .then((res) => active && setConsistency(res))
       .catch((err) => {
         if (active) setError(err instanceof ApiError ? err.detail : "Couldn't load the calendar.");
       });
+    Promise.allSettled([latestPromise, consistencyPromise]).then(() => {
+      if (active) setLoading(false);
+    });
     return () => {
       active = false;
     };
@@ -83,14 +88,20 @@ export function FieldPanel({ field, onEdit, onDelete }: FieldPanelProps) {
         onLogged={handleLogged}
       />
 
-      {latest && !loggedToday && (
-        <p className="field-panel__hint">
-          Last logged {latest.entryValue}
-          {field.unit ? ` ${field.unit}` : ""} on {latest.entryDate}.
-        </p>
-      )}
+      {loading ? (
+        <p className="field__helper">Loading…</p>
+      ) : (
+        <>
+          {latest && !loggedToday && (
+            <p className="field-panel__hint">
+              Last logged {latest.entryValue}
+              {field.unit ? ` ${field.unit}` : ""} on {latest.entryDate}.
+            </p>
+          )}
 
-      {consistency && <ConsistencyCalendar data={consistency} />}
+          {consistency && <ConsistencyCalendar data={consistency} />}
+        </>
+      )}
 
       {error && <p className="field__helper field__helper--error">{error}</p>}
     </div>

@@ -4,6 +4,8 @@ import type { EntryResponse, FieldType } from "../lib/types";
 import { useToast } from "../context/ToastContext";
 import "./EntryLogger.css";
 
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
 interface EntryLoggerProps {
   habitFieldSeqId: number;
   fieldType: FieldType;
@@ -82,7 +84,7 @@ export function EntryLogger({
           type={fieldType === "NUMBER" || fieldType === "DURATION" ? "number" : "text"}
           inputMode={fieldType === "NUMBER" || fieldType === "DURATION" ? "decimal" : undefined}
           step={fieldType === "NUMBER" || fieldType === "DURATION" ? "any" : undefined}
-          placeholder={goalValue ? `Goal ${goalValue}${unit ? ` ${unit}` : ""}` : unit ?? "Value"}
+          placeholder={goalValue ? `Goal ${goalValue}${unit ? ` ${unit}` : ""}` : unit ? capitalize(unit) : "Value"}
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           disabled={status === "saving"}

@@ -1,0 +1,51 @@
+.habit-group-tile {
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  grid-column: span 1;
+}
+
+@media (min-width: 60rem) {
+  .habit-group-tile {
+    grid-column: span 2;
+  }
+}
+
+.habit-group-tile__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.habit-group-tile__name {
+  font-size: var(--text-md);
+}
+
+.habit-group-tile__name a {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .habit-group-tile__name a:hover {
+    color: var(--color-accent);
+  }
+}
+
+.habit-group-tile__progress {
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.habit-group-tile__fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-sm);
+}

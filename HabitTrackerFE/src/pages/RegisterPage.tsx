@@ -48,7 +48,7 @@ export function RegisterPage() {
     <section className="auth-page">
       <div className="auth-card">
         <div>
-          <p className="auth-card__eyebrow">Almanac</p>
+          <p className="auth-card__eyebrow">Nitya</p>
           <h1 className="auth-card__title">Keep the record.</h1>
           <p className="auth-card__body">
             No passwords — your device's passkey is the key. Create one, then sign in with it every day after.

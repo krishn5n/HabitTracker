@@ -130,7 +130,7 @@ export function CreateHabitModal({ open, userSeqId, onClose, onCreated }: Create
             <input
               id="habit-unit"
               className="control"
-              placeholder={fieldType === "DURATION" ? "min" : "reps"}
+              placeholder={fieldType === "DURATION" ? "Min" : "Reps"}
               value={unit}
               onChange={(event) => setUnit(event.target.value)}
               maxLength={30}

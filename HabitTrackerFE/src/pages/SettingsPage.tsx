@@ -6,6 +6,12 @@ import type { Gender, UserResponse } from "../lib/types";
 import "./SettingsPage.css";
 
 const GENDERS: Gender[] = ["UNSPECIFIED", "FEMALE", "MALE", "OTHER"];
+const GENDER_LABELS: Record<Gender, string> = {
+  UNSPECIFIED: "Unspecified",
+  FEMALE: "Female",
+  MALE: "Male",
+  OTHER: "Other",
+};
 
 export function SettingsPage() {
   const { session } = useAuth();
@@ -82,7 +88,7 @@ export function SettingsPage() {
           <select id="gender" className="control" value={gender} onChange={(event) => setGender(event.target.value as Gender)}>
             {GENDERS.map((value) => (
               <option key={value} value={value}>
-                {value}
+                {GENDER_LABELS[value]}
               </option>
             ))}
           </select>
@@ -107,6 +113,7 @@ export function SettingsPage() {
               inputMode="decimal"
               value={weightKg}
               onChange={(event) => setWeightKg(event.target.value)}
+              onFocus={(event) => event.currentTarget.scrollIntoView({ block: "center", behavior: "smooth" })}
             />
           </div>
           <div className="field">
@@ -120,6 +127,7 @@ export function SettingsPage() {
               inputMode="decimal"
               value={heightCm}
               onChange={(event) => setHeightCm(event.target.value)}
+              onFocus={(event) => event.currentTarget.scrollIntoView({ block: "center", behavior: "smooth" })}
             />
           </div>
         </div>

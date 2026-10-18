@@ -1,5 +1,5 @@
 /* Hallmark · genre: editorial · macrostructure: Bento Grid (adapted — app dashboard, not landing page)
- * theme: Almanac (custom-tuned) · nav: N9 edge-aligned minimal + tab row · footer: Ft2 inline single line
+ * theme: Nitya (custom-tuned) · nav: N9 edge-aligned minimal + tab row · footer: Ft2 inline single line
  * fonts: Fraunces (display) · IBM Plex Sans (body) · JetBrains Mono (outlier — wordmark + today-stat only)
  * accent: terracotta (warm, hue 35) · secondary: ochre (warm, hue 70, "missed" state only)
  */
@@ -56,11 +56,11 @@
   --space-2xl: 4rem;
   --space-3xl: 6rem;
 
-  /* ---- motion — Almanac register: functional, reference-book, slightly damped ---- */
+  /* ---- motion — Nitya register: functional, reference-book, slightly damped ---- */
   --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in:     cubic-bezier(0.7, 0, 0.84, 0);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --dur-micro: 102ms;  /* 120ms x 0.85 almanac scale */
+  --dur-micro: 102ms;  /* 120ms x 0.85 nitya scale */
   --dur-short: 187ms;  /* 220ms x 0.85 */
   --dur-long:  357ms;  /* 420ms x 0.85 */
 

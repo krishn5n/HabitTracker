@@ -53,7 +53,7 @@ export function LoginPage() {
     <section className="auth-page">
       <div className="auth-card">
         <div>
-          <p className="auth-card__eyebrow">Almanac</p>
+          <p className="auth-card__eyebrow">Nitya</p>
           <h1 className="auth-card__title">Welcome back.</h1>
           <p className="auth-card__body">
             {location.state?.registered

@@ -6,7 +6,7 @@
 
 .consistency__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(0.9rem, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: var(--space-2xs);
 }
 
