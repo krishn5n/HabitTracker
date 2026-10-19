@@ -7,6 +7,8 @@ import type { HabitResponse, Page } from "../lib/types";
 import { EmptyState } from "../components/EmptyState";
 import { CreateHabitModal } from "../components/CreateHabitModal";
 import { EditHabitModal } from "../components/EditHabitModal";
+import { ConfirmDialog } from "../components/ConfirmDialog";
+import { Skeleton, SkeletonRegion } from "../components/Skeleton";
 import "./HabitsPage.css";
 
 export function HabitsPage() {
@@ -16,6 +18,7 @@ export function HabitsPage() {
   const [showInactive, setShowInactive] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<HabitResponse | null>(null);
+  const [removing, setRemoving] = useState<HabitResponse | null>(null);
 
   useEffect(() => {
     if (!session) return;
@@ -33,6 +36,8 @@ export function HabitsPage() {
       setHabits((current) => current?.map((h) => (h.habitSeqId === habit.habitSeqId ? { ...h, active: false } : h)) ?? null);
     } catch (err) {
       push({ tone: "error", message: err instanceof ApiError ? err.detail : "Couldn't remove that habit." });
+    } finally {
+      setRemoving(null);
     }
   }
 
@@ -58,6 +63,8 @@ export function HabitsPage() {
         <input type="checkbox" checked={showInactive} onChange={(event) => setShowInactive(event.target.checked)} />
         Show removed habits
       </label>
+
+      {habits === null && <HabitsListSkeleton />}
 
       {habits && habits.length === 0 && (
         <EmptyState
@@ -87,7 +94,7 @@ export function HabitsPage() {
                   Edit
                 </button>
                 {habit.active && (
-                  <button type="button" className="btn btn--danger btn--sm" onClick={() => handleDelete(habit)}>
+                  <button type="button" className="btn btn--danger btn--sm" onClick={() => setRemoving(habit)}>
                     Remove
                   </button>
                 )}
@@ -107,6 +114,37 @@ export function HabitsPage() {
       )}
 
       {editing && <EditHabitModal habit={editing} onClose={() => setEditing(null)} onUpdated={handleUpdated} />}
+
+      {removing && (
+        <ConfirmDialog
+          title="Remove this habit?"
+          message={`"${removing.name}" will disappear from today's dashboard. Its past entries are kept, and you can still find it under "Show removed habits".`}
+          confirmLabel="Remove"
+          onConfirm={() => handleDelete(removing)}
+          onCancel={() => setRemoving(null)}
+        />
+      )}
     </section>
+  );
+}
+
+function HabitsListSkeleton() {
+  return (
+    <SkeletonRegion label="Loading your habits">
+      <ul className="habits-list">
+        {[0, 1, 2, 3].map((i) => (
+          <li key={i} className="habits-list__row">
+            <div className="skeleton-stack habits-list__skeleton-text">
+              <Skeleton width={i % 2 === 0 ? "55%" : "40%"} height="1.25rem" />
+              <Skeleton width="80%" height="0.875rem" />
+            </div>
+            <div className="habits-list__actions">
+              <Skeleton width="3.5rem" height="2.25rem" radius="md" />
+              <Skeleton width="5rem" height="2.25rem" radius="md" />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </SkeletonRegion>
   );
 }

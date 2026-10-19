@@ -91,3 +91,7 @@
   gap: var(--space-xs);
   flex-shrink: 0;
 }
+
+.habits-list__skeleton-text {
+  flex: 1;
+}

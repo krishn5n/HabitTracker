@@ -3,7 +3,9 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
 import { api, ApiError } from "../lib/api";
 import type { HabitFieldResponse, HabitResponse, Page } from "../lib/types";
-import { FieldPanel } from "../components/FieldPanel";
+import { FieldPanel, FieldPanelSkeleton } from "../components/FieldPanel";
+import { Skeleton, SkeletonRegion } from "../components/Skeleton";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { EditHabitModal } from "../components/EditHabitModal";
 import { HabitFieldFormModal } from "../components/HabitFieldFormModal";
 import "./HabitDetailPage.css";
@@ -16,6 +18,7 @@ export function HabitDetailPage() {
   const [fields, setFields] = useState<HabitFieldResponse[] | null>(null);
   const [editingHabit, setEditingHabit] = useState(false);
   const [fieldModal, setFieldModal] = useState<"new" | HabitFieldResponse | null>(null);
+  const [deletingField, setDeletingField] = useState<HabitFieldResponse | null>(null);
 
   useEffect(() => {
     if (!habitSeqId) return;
@@ -45,11 +48,29 @@ export function HabitDetailPage() {
       setFields((current) => current?.filter((f) => f.habitFieldSeqId !== field.habitFieldSeqId) ?? null);
     } catch (err) {
       push({ tone: "error", message: err instanceof ApiError ? err.detail : "Couldn't remove that field." });
+    } finally {
+      setDeletingField(null);
     }
   }
 
   if (!habit || !fields) {
-    return <p className="field__helper">Loading…</p>;
+    return (
+      <SkeletonRegion label="Loading this habit" className="habit-detail">
+        <Link to="/habits" className="habit-detail__back">
+          ← All habits
+        </Link>
+        <div className="habit-detail__head">
+          <div className="skeleton-stack" style={{ flex: 1 }}>
+            <Skeleton width="60%" height="2.25rem" />
+            <Skeleton width="85%" height="1rem" />
+          </div>
+        </div>
+        <div className="habit-detail__fields">
+          <FieldPanelSkeleton />
+          <FieldPanelSkeleton />
+        </div>
+      </SkeletonRegion>
+    );
   }
 
   return (
@@ -74,7 +95,7 @@ export function HabitDetailPage() {
             key={field.habitFieldSeqId}
             field={field}
             onEdit={() => setFieldModal(field)}
-            onDelete={() => handleDeleteField(field)}
+            onDelete={() => setDeletingField(field)}
           />
         ))}
         <button type="button" className="btn btn--outline" onClick={() => setFieldModal("new")}>
@@ -108,6 +129,16 @@ export function HabitDetailPage() {
             });
             setFieldModal(null);
           }}
+        />
+      )}
+
+      {deletingField && (
+        <ConfirmDialog
+          title="Delete this sub habit?"
+          message={`"${deletingField.fieldName}" will be deleted permanently. This can't be undone.`}
+          confirmLabel="Delete"
+          onConfirm={() => handleDeleteField(deletingField)}
+          onCancel={() => setDeletingField(null)}
         />
       )}
 

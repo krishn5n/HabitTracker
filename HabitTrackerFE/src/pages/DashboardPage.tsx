@@ -14,6 +14,7 @@ import { HabitGroupTile } from "../components/HabitGroupTile";
 import { SummaryRow } from "../components/SummaryRow";
 import { EmptyState } from "../components/EmptyState";
 import { CreateHabitModal } from "../components/CreateHabitModal";
+import { Skeleton, SkeletonRegion, SkeletonSummaryRow } from "../components/Skeleton";
 import "./DashboardPage.css";
 
 export function DashboardPage() {
@@ -103,7 +104,20 @@ export function DashboardPage() {
         </button>
       </div>
 
-      {status === "loading" && <p className="field__helper">Loading your habits…</p>}
+      {status === "loading" && (
+        <SkeletonRegion label="Loading your habits" className="dashboard__loading">
+          <SkeletonSummaryRow />
+          <div className="dashboard__grid">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="habit-tile">
+                <Skeleton width="45%" height="0.875rem" />
+                <Skeleton width="35%" height="3rem" />
+                <Skeleton height="var(--control-height)" radius="md" />
+              </div>
+            ))}
+          </div>
+        </SkeletonRegion>
+      )}
 
       {status === "ready" && data && data.habits.length === 0 && (
         <div className="dashboard__grid">

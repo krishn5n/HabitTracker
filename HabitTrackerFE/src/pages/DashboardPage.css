@@ -40,3 +40,9 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+.dashboard__loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}

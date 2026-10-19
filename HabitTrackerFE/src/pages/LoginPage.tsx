@@ -72,7 +72,7 @@ export function LoginPage() {
               name="email"
               className="control"
               type="email"
-              autoComplete="username"
+              autoComplete="email"
               inputMode="email"
               autoCapitalize="none"
               autoCorrect="off"

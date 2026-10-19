@@ -20,14 +20,43 @@
   gap: var(--space-lg);
 }
 
+/* minmax(0, 1fr) lets each column shrink below the inputs' intrinsic width, so the pair always fits the screen */
 .settings-form__row {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-md);
 }
 
-@media (min-width: 26rem) {
-  .settings-form__row {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.settings-form__unit-control {
+  position: relative;
+}
+
+.settings-form__unit-control .control {
+  padding-inline-end: var(--space-xl);
+}
+
+.settings-form__unit {
+  position: absolute;
+  inset-block: 0;
+  right: var(--space-md);
+  display: flex;
+  align-items: center;
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  pointer-events: none;
+}
+
+.settings-form__unit-control input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.settings-form__unit-control input[type="number"]::-webkit-inner-spin-button,
+.settings-form__unit-control input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.settings-form__submit {
+  width: 100%;
 }

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { api, ApiError } from "../lib/api";
 import type { ConsistencyResponse, EntryResponse, HabitFieldResponse } from "../lib/types";
 import { EntryLogger } from "./EntryLogger";
+import { Skeleton, SkeletonRegion, SkeletonStats } from "./Skeleton";
 import "./FieldPanel.css";
 
 interface FieldPanelProps {
@@ -110,7 +111,9 @@ export function FieldPanel({ field, onEdit, onDelete }: FieldPanelProps) {
       </div>
 
       {loading ? (
-        <p className="field__helper">Loading…</p>
+        <SkeletonRegion label="Loading this field's progress">
+          <SkeletonStats />
+        </SkeletonRegion>
       ) : (
         <>
           {latest && !loggedToday && (
@@ -140,6 +143,26 @@ export function FieldPanel({ field, onEdit, onDelete }: FieldPanelProps) {
       )}
 
       {error && <p className="field__helper field__helper--error">{error}</p>}
+    </div>
+  );
+}
+
+/** Stand-in for a FieldPanel while the habit's fields are still loading. */
+export function FieldPanelSkeleton() {
+  return (
+    <div className="field-panel">
+      <div className="field-panel__head">
+        <div className="skeleton-stack" style={{ flex: 1 }}>
+          <Skeleton width="50%" height="1.25rem" />
+          <Skeleton width="35%" height="0.75rem" />
+        </div>
+        <div className="field-panel__actions">
+          <Skeleton width="3rem" height="2.25rem" radius="md" />
+          <Skeleton width="4rem" height="2.25rem" radius="md" />
+        </div>
+      </div>
+      <Skeleton height="var(--control-height)" radius="md" />
+      <SkeletonStats />
     </div>
   );
 }

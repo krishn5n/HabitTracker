@@ -21,6 +21,7 @@ const FIELD_TYPES: { value: FieldType; label: string; hint: string }[] = [
 export function CreateHabitModal({ open, userSeqId, onClose, onCreated }: CreateHabitModalProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [fieldName, setFieldName] = useState("");
   const [fieldType, setFieldType] = useState<FieldType>("NUMBER");
   const [unit, setUnit] = useState("");
   const [goalValue, setGoalValue] = useState("");
@@ -32,6 +33,7 @@ export function CreateHabitModal({ open, userSeqId, onClose, onCreated }: Create
   function reset() {
     setName("");
     setDescription("");
+    setFieldName("");
     setFieldType("NUMBER");
     setUnit("");
     setGoalValue("");
@@ -51,6 +53,7 @@ export function CreateHabitModal({ open, userSeqId, onClose, onCreated }: Create
         description: description.trim() === "" ? undefined : description.trim(),
       });
       const field = await api.post<HabitFieldResponse>(`/api/habits/${habit.habitSeqId}/fields`, {
+        fieldName: fieldName.trim() === "" ? undefined : fieldName.trim(),
         fieldType,
         unit: unit.trim() === "" ? undefined : unit.trim(),
         goalValue: goalAllowed && goalValue.trim() !== "" ? Number(goalValue) : undefined,
@@ -101,6 +104,20 @@ export function CreateHabitModal({ open, userSeqId, onClose, onCreated }: Create
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             maxLength={500}
+          />
+        </div>
+
+        <div className="field">
+          <label className="field__label" htmlFor="habit-field-name">
+            Sub habit name <span style={{ color: "var(--color-muted)", fontWeight: 400 }}>(optional)</span>
+          </label>
+          <input
+            id="habit-field-name"
+            className="control"
+            placeholder={name.trim() === "" ? "Leave blank to use the habit name" : `Leave blank to use "${name.trim()}"`}
+            value={fieldName}
+            onChange={(event) => setFieldName(event.target.value)}
+            maxLength={100}
           />
         </div>
 

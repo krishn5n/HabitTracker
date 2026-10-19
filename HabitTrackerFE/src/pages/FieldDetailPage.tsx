@@ -7,6 +7,7 @@ import { SegmentedToggle } from "../components/SegmentedToggle";
 import { MonthCalendarGrid } from "../components/MonthCalendarGrid";
 import { EntryHistoryList } from "../components/EntryHistoryList";
 import { DetailStatsRow } from "../components/DetailStatsRow";
+import { Skeleton, SkeletonRegion, SkeletonSummaryRow } from "../components/Skeleton";
 import "./FieldDetailPage.css";
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
@@ -118,7 +119,22 @@ export function FieldDetailPage() {
     if (view === "history" && historyEntries.length === 0) loadHistoryPage(0);
   }, [view, historyEntries.length, loadHistoryPage]);
 
-  if (!field) return <p className="field__helper">Loading…</p>;
+  if (!field) {
+    return (
+      <SkeletonRegion label="Loading this field" className="field-detail">
+        <Link to={`/habits/${habitSeqId}`} className="field-detail__back">
+          ← Back to habit
+        </Link>
+        <div className="skeleton-stack">
+          <Skeleton width="55%" height="2.25rem" />
+          <Skeleton width="30%" height="0.875rem" />
+        </div>
+        <SkeletonSummaryRow />
+        <Skeleton width="11.5rem" height="2.625rem" radius="md" />
+        <Skeleton height="20rem" radius="lg" />
+      </SkeletonRegion>
+    );
+  }
 
   const rate =
     lastWeekEntries && lastWeekEntries.length > 0

@@ -117,10 +117,12 @@ button {
   color: var(--color-error);
 }
 
+/* width + min-width keep number/date inputs from holding their intrinsic ~20ch width and overflowing a narrow column */
 .control {
+  width: 100%;
+  min-width: 0;
   height: var(--control-height);
   padding-inline: var(--space-md);
-  padding-inline-end: var(--space-2xl);
   border: 1px solid var(--color-rule-2);
   outline: 2px solid transparent;
   outline-offset: 1px;
@@ -165,6 +167,30 @@ textarea.control {
 
 select.control {
   padding-inline-end: var(--space-xl);
+}
+
+/* iOS Safari sizes date inputs from their content and centres the text — pin them to the column */
+input[type="date"].control {
+  display: block;
+  text-align: left;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="date"].control::-webkit-date-and-time-value {
+  text-align: left;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .btn {

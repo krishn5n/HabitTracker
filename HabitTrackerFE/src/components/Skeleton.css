@@ -1,0 +1,61 @@
+.skeleton {
+  display: block;
+  max-width: 100%;
+  flex-shrink: 0;
+  background: linear-gradient(
+    90deg,
+    var(--color-paper-3) 0%,
+    var(--color-paper-3) 35%,
+    var(--color-rule) 50%,
+    var(--color-paper-3) 65%,
+    var(--color-paper-3) 100%
+  );
+  background-size: 300% 100%;
+  animation: skeleton-shimmer 1.4s var(--ease-in-out) infinite;
+}
+
+.skeleton--sm {
+  border-radius: var(--radius-sm);
+}
+
+.skeleton--md {
+  border-radius: var(--radius-md);
+}
+
+.skeleton--lg {
+  border-radius: var(--radius-lg);
+}
+
+.skeleton--pill {
+  border-radius: 999px;
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+/* the global reduced-motion rule only shortens animations — a 150ms shimmer would flicker, so hold still instead */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none !important;
+    background: var(--color-paper-3);
+  }
+}
+
+.skeleton-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.skeleton-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+}
