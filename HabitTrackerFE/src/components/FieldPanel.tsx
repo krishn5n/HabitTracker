@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { api, ApiError } from "../lib/api";
 import type { ConsistencyResponse, EntryResponse, HabitFieldResponse } from "../lib/types";
 import { EntryLogger } from "./EntryLogger";
-import { ConsistencyCalendar } from "./ConsistencyCalendar";
 import "./FieldPanel.css";
 
 interface FieldPanelProps {
@@ -35,7 +34,7 @@ export function FieldPanel({ field, onEdit, onDelete }: FieldPanelProps) {
       .get<ConsistencyResponse>(`/api/habit-fields/${field.habitFieldSeqId}/consistency`)
       .then((res) => active && setConsistency(res))
       .catch((err) => {
-        if (active) setError(err instanceof ApiError ? err.detail : "Couldn't load the calendar.");
+        if (active) setError(err instanceof ApiError ? err.detail : "Couldn't load these metrics.");
       });
     Promise.allSettled([latestPromise, consistencyPromise]).then(() => {
       if (active) setLoading(false);
@@ -47,6 +46,9 @@ export function FieldPanel({ field, onEdit, onDelete }: FieldPanelProps) {
 
   const today = todayIso();
   const loggedToday = latest?.entryDate === today;
+  const logged = consistency?.entries.length ?? 0;
+  const metRate = logged > 0 ? Math.round((consistency!.entries.filter((e) => e.completed).length / logged) * 100) : null;
+  const goalLabel = field.goalValue !== null ? `${field.goalValue}${field.unit ? ` ${field.unit}` : ""}` : "Any";
 
   function handleLogged(entry: EntryResponse) {
     setLatest(entry);
@@ -99,7 +101,20 @@ export function FieldPanel({ field, onEdit, onDelete }: FieldPanelProps) {
             </p>
           )}
 
-          {consistency && <ConsistencyCalendar data={consistency} />}
+          <dl className="field-panel__stats">
+            <div className="field-panel__stat">
+              <dt>Goal met</dt>
+              <dd>{metRate !== null ? `${metRate}%` : "—"}</dd>
+            </div>
+            <div className="field-panel__stat">
+              <dt>Days logged</dt>
+              <dd>{logged}</dd>
+            </div>
+            <div className="field-panel__stat">
+              <dt>Goal</dt>
+              <dd>{goalLabel}</dd>
+            </div>
+          </dl>
         </>
       )}
 
