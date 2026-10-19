@@ -2,8 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
 import { api, ApiError } from "../lib/api";
-import type { ConsistencyResponse, EntryResponse, HabitFieldResponse, Page } from "../lib/types";
-import { EntryLogger } from "../components/EntryLogger";
+import type { EntryResponse, HabitFieldResponse, Page } from "../lib/types";
 import { SegmentedToggle } from "../components/SegmentedToggle";
 import { MonthCalendarGrid } from "../components/MonthCalendarGrid";
 import { EntryHistoryList } from "../components/EntryHistoryList";
@@ -11,6 +10,14 @@ import { DetailStatsRow } from "../components/DetailStatsRow";
 import "./FieldDetailPage.css";
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
+
+const LAST_WEEK_DAYS = 7;
+
+function lastWeekBounds(): { fromDate: string; toDate: string } {
+  const start = new Date();
+  start.setDate(start.getDate() - (LAST_WEEK_DAYS - 1));
+  return { fromDate: start.toISOString().slice(0, 10), toDate: todayIso() };
+}
 
 function monthBounds(month: Date): { fromDate: string; toDate: string } {
   const year = month.getFullYear();
@@ -39,8 +46,7 @@ export function FieldDetailPage() {
   const { push } = useToast();
 
   const [field, setField] = useState<HabitFieldResponse | null>(null);
-  const [latest, setLatest] = useState<EntryResponse | null>(null);
-  const [consistency, setConsistency] = useState<ConsistencyResponse | null>(null);
+  const [lastWeekEntries, setLastWeekEntries] = useState<EntryResponse[] | null>(null);
   const [streak, setStreak] = useState(0);
   const [view, setView] = useState<"calendar" | "history">("calendar");
 
@@ -66,14 +72,11 @@ export function FieldDetailPage() {
         push({ tone: "error", message: err instanceof ApiError ? err.detail : "Couldn't load that field." });
       });
     api
-      .get<EntryResponse>(`/api/habit-fields/${habitFieldSeqId}/entries/latest`)
-      .then(setLatest)
-      .catch((err) => {
-        if (err instanceof ApiError && err.status === 404) return;
-      });
-    api
-      .get<ConsistencyResponse>(`/api/habit-fields/${habitFieldSeqId}/consistency`)
-      .then(setConsistency)
+      .get<Page<EntryResponse>>(`/api/habit-fields/${habitFieldSeqId}/entries`, {
+        ...lastWeekBounds(),
+        size: LAST_WEEK_DAYS,
+      })
+      .then((res) => setLastWeekEntries(res.content))
       .catch(() => {});
     api
       .get<Page<EntryResponse>>(`/api/habit-fields/${habitFieldSeqId}/entries`, {
@@ -115,33 +118,11 @@ export function FieldDetailPage() {
     if (view === "history" && historyEntries.length === 0) loadHistoryPage(0);
   }, [view, historyEntries.length, loadHistoryPage]);
 
-  function handleLogged(entry: EntryResponse) {
-    setLatest(entry);
-    const { fromDate, toDate } = monthBounds(month);
-    if (entry.entryDate >= fromDate && entry.entryDate <= toDate) {
-      setMonthEntries((current) => [...current.filter((e) => e.entryDate !== entry.entryDate), entry]);
-    }
-    setHistoryEntries((current) =>
-      current.length === 0 ? current : [entry, ...current.filter((e) => e.entryDate !== entry.entryDate)],
-    );
-    if (entry.entryDate === todayIso() && habitFieldSeqId) {
-      api
-        .get<Page<EntryResponse>>(`/api/habit-fields/${habitFieldSeqId}/entries`, {
-          toDate: todayIso(),
-          size: 60,
-          sort: "entryDate,desc",
-        })
-        .then((res) => setStreak(computeStreak(res.content)))
-        .catch(() => {});
-    }
-  }
-
   if (!field) return <p className="field__helper">Loading…</p>;
 
-  const loggedToday = latest?.entryDate === todayIso();
   const rate =
-    consistency && consistency.entries.length > 0
-      ? Math.round((consistency.entries.filter((e) => e.completed).length / consistency.entries.length) * 100)
+    lastWeekEntries && lastWeekEntries.length > 0
+      ? Math.round((lastWeekEntries.filter((e) => e.completed).length / lastWeekEntries.length) * 100)
       : null;
   const now = new Date();
   const isCurrentMonth = month.getFullYear() === now.getFullYear() && month.getMonth() === now.getMonth();
@@ -167,16 +148,6 @@ export function FieldDetailPage() {
         streak={streak}
         rateLabel={rate !== null ? `${rate}%` : "—"}
         goalLabel={field.goalValue !== null ? `${field.goalValue}${field.unit ? ` ${field.unit}` : ""}` : "Any"}
-      />
-
-      <EntryLogger
-        habitFieldSeqId={field.habitFieldSeqId}
-        fieldType={field.fieldType}
-        unit={field.unit}
-        goalValue={field.goalValue}
-        initialValue={loggedToday ? latest!.entryValue : null}
-        initialCompleted={loggedToday ? latest!.completed : false}
-        onLogged={handleLogged}
       />
 
       <div className="field-detail__toggle-wrap">

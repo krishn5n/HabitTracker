@@ -15,7 +15,7 @@ export function DetailStatsRow({ streak, rateLabel, goalLabel }: DetailStatsRowP
       </div>
       <div className="summary-row__item">
         <span className="summary-row__value">{rateLabel}</span>
-        <span className="summary-row__label">Last 4 wks</span>
+        <span className="summary-row__label">Last Week</span>
       </div>
       <div className="summary-row__item">
         <span className="summary-row__value">{goalLabel}</span>
