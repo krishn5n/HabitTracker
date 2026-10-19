@@ -62,7 +62,9 @@ export function RegisterPage() {
             </label>
             <input
               id="register-name"
+              name="name"
               className="control"
+              autoComplete="name"
               value={displayName}
               onChange={(event) => setDisplayName(event.target.value)}
               maxLength={100}
@@ -75,8 +77,10 @@ export function RegisterPage() {
             </label>
             <input
               id="register-dob"
+              name="bday"
               className="control"
               type="date"
+              autoComplete="bday"
               value={dateOfBirth}
               onChange={(event) => setDateOfBirth(event.target.value)}
               max={new Date().toISOString().slice(0, 10)}
@@ -89,8 +93,14 @@ export function RegisterPage() {
             </label>
             <input
               id="register-email"
+              name="email"
               className="control"
               type="email"
+              autoComplete="username"
+              inputMode="email"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               maxLength={255}

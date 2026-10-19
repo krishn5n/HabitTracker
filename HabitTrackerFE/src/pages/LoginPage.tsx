@@ -69,8 +69,14 @@ export function LoginPage() {
             </label>
             <input
               id="login-email"
+              name="email"
               className="control"
               type="email"
+              autoComplete="username"
+              inputMode="email"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               maxLength={255}
