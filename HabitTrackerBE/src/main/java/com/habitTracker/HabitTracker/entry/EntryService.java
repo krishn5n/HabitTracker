@@ -26,6 +26,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class EntryService {
 
+    private static final int CONSISTENCY_WINDOW_DAYS = 40;
+
     private final EntryRepository entryRepository;
     private final HabitFieldRepository habitFieldRepository;
     private final UserRepository userRepository;
@@ -91,7 +93,8 @@ public class EntryService {
 
         LocalDate today = LocalDate.now();
         LocalDate inceptionDate = entryRepository.findInceptionDate(habitFieldSeqId).orElse(today);
-        LocalDate windowStart = inceptionDate.isAfter(today.minusWeeks(4)) ? inceptionDate : today.minusWeeks(4);
+        LocalDate windowFloor = today.minusDays(CONSISTENCY_WINDOW_DAYS - 1);
+        LocalDate windowStart = inceptionDate.isAfter(windowFloor) ? inceptionDate : windowFloor;
 
         List<ConsistencyResponse.EntryStatus> entries = entryRepository.findInWindow(habitFieldSeqId, windowStart)
                 .stream()

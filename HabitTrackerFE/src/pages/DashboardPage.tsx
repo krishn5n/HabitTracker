@@ -2,7 +2,13 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { api, ApiError } from "../lib/api";
-import type { DashboardField, DashboardResponse, HabitFieldResponse, HabitResponse } from "../lib/types";
+import type {
+  DashboardField,
+  DashboardResponse,
+  EntryResponse,
+  HabitFieldResponse,
+  HabitResponse,
+} from "../lib/types";
 import { HabitTile, fieldStatus } from "../components/HabitTile";
 import { HabitGroupTile } from "../components/HabitGroupTile";
 import { SummaryRow } from "../components/SummaryRow";
@@ -61,7 +67,25 @@ export function DashboardPage() {
     }));
   }
 
-  const allFields: DashboardField[] = data?.habits.flatMap((h) => h.fields) ?? [];
+  function handleLogged(entry: EntryResponse) {
+    if (entry.entryDate !== new Date().toISOString().slice(0, 10)) return;
+    setData((current) =>
+      current === null
+        ? current
+        : {
+            habits: current.habits.map((habit) => ({
+              ...habit,
+              fields: habit.fields.map((field) =>
+                field.habitFieldSeqId === entry.habitFieldSeqId
+                  ? { ...field, todayValue: entry.entryValue, completedToday: entry.completed, updatedAt: entry.updatedAt }
+                  : field,
+              ),
+            })),
+          },
+    );
+  }
+
+  const allFields: DashboardField[] =data?.habits.flatMap((h) => h.fields) ?? [];
   const achieved = allFields.filter((f) => fieldStatus(f) === "achieved").length;
   const partial = allFields.filter((f) => fieldStatus(f) === "partial").length;
   const empty = allFields.filter((f) => fieldStatus(f) === "empty").length;
@@ -98,9 +122,15 @@ export function DashboardPage() {
           <div className="dashboard__grid">
             {data.habits.map((habit) =>
               habit.fields.length > 1 ? (
-                <HabitGroupTile key={habit.habitSeqId} habit={habit} />
+                <HabitGroupTile key={habit.habitSeqId} habit={habit} onLogged={handleLogged} />
               ) : (
-                <HabitTile key={habit.habitSeqId} habitSeqId={habit.habitSeqId} field={habit.fields[0]} wide />
+                <HabitTile
+                  key={habit.habitSeqId}
+                  habitSeqId={habit.habitSeqId}
+                  field={habit.fields[0]}
+                  wide
+                  onLogged={handleLogged}
+                />
               ),
             )}
           </div>

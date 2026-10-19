@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import type { DashboardField } from "../lib/types";
+import type { DashboardField, EntryResponse } from "../lib/types";
+import { EntryLogger } from "./EntryLogger";
 import "./HabitTile.css";
 
 export type FieldStatus = "achieved" | "partial" | "empty";
@@ -14,6 +15,7 @@ interface HabitTileProps {
   habitSeqId: number;
   field: DashboardField;
   wide?: boolean;
+  onLogged: (entry: EntryResponse) => void;
 }
 
 const STATUS_LABEL: Record<FieldStatus, string> = {
@@ -22,18 +24,17 @@ const STATUS_LABEL: Record<FieldStatus, string> = {
   empty: "Not logged",
 };
 
-export function HabitTile({ habitSeqId, field, wide = false }: HabitTileProps) {
+export function HabitTile({ habitSeqId, field, wide = false, onLogged }: HabitTileProps) {
   const status = fieldStatus(field);
   const numericValue = field.todayValue !== null ? Number(field.todayValue) : null;
   const hasGoal = field.goalValue !== null;
   const progress = hasGoal && numericValue !== null ? Math.min(1, numericValue / (field.goalValue ?? 1)) : null;
 
   return (
-    <Link
-      to={`/habits/${habitSeqId}/fields/${field.habitFieldSeqId}`}
-      className={`habit-tile${wide ? " habit-tile--wide" : ""}`}
-    >
-      <span className="habit-tile__name">{field.fieldName}</span>
+    <div className={`habit-tile${wide ? " habit-tile--wide" : ""}`}>
+      <Link to={`/habits/${habitSeqId}/fields/${field.habitFieldSeqId}`} className="habit-tile__name">
+        {field.fieldName}
+      </Link>
       <span className="habit-tile__value">
         {field.todayValue ?? "—"}
         {field.unit && field.todayValue !== null ? <span className="habit-tile__unit">{field.unit}</span> : null}
@@ -51,6 +52,17 @@ export function HabitTile({ habitSeqId, field, wide = false }: HabitTileProps) {
           ? `${Math.max(0, field.goalValue - (numericValue ?? 0))} to go`
           : STATUS_LABEL[status]}
       </span>
-    </Link>
+      <div className="habit-tile__logger">
+        <EntryLogger
+          habitFieldSeqId={field.habitFieldSeqId}
+          fieldType={field.fieldType}
+          unit={field.unit}
+          goalValue={field.goalValue}
+          initialValue={field.todayValue}
+          initialCompleted={field.completedToday}
+          onLogged={onLogged}
+        />
+      </div>
+    </div>
   );
 }

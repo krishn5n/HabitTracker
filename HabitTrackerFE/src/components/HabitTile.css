@@ -32,6 +32,12 @@
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-ink-2);
+  text-decoration: none;
+  align-self: flex-start;
+}
+
+.habit-tile__logger {
+  margin-top: auto;
 }
 
 .habit-tile__value {

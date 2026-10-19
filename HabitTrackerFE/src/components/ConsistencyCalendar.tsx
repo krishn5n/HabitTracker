@@ -17,13 +17,13 @@ function trailingDays(windowDays: number): string[] {
   return dates;
 }
 
-export function ConsistencyCalendar({ data, windowDays = 28 }: ConsistencyCalendarProps) {
+export function ConsistencyCalendar({ data, windowDays = 40 }: ConsistencyCalendarProps) {
   const byDate = new Map(data.entries.map((entry) => [entry.entryDate, entry.completed]));
   const days = trailingDays(windowDays);
 
   return (
     <div className="consistency">
-      <div className="consistency__grid" role="list" aria-label="Last four weeks">
+      <div className="consistency__grid" role="list" aria-label="Last 40 days">
         {days.map((date) => {
           const completed = byDate.get(date);
           const state = completed === undefined ? "empty" : completed ? "done" : "missed";

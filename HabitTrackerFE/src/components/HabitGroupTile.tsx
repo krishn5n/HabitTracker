@@ -1,13 +1,14 @@
 import { Link } from "react-router-dom";
-import type { DashboardHabit } from "../lib/types";
+import type { DashboardHabit, EntryResponse } from "../lib/types";
 import { HabitTile, fieldStatus } from "./HabitTile";
 import "./HabitGroupTile.css";
 
 interface HabitGroupTileProps {
   habit: DashboardHabit;
+  onLogged: (entry: EntryResponse) => void;
 }
 
-export function HabitGroupTile({ habit }: HabitGroupTileProps) {
+export function HabitGroupTile({ habit, onLogged }: HabitGroupTileProps) {
   const done = habit.fields.filter((f) => fieldStatus(f) === "achieved").length;
 
   return (
@@ -22,7 +23,12 @@ export function HabitGroupTile({ habit }: HabitGroupTileProps) {
       </div>
       <div className="habit-group-tile__fields">
         {habit.fields.map((field) => (
-          <HabitTile key={field.habitFieldSeqId} habitSeqId={habit.habitSeqId} field={field} />
+          <HabitTile
+            key={field.habitFieldSeqId}
+            habitSeqId={habit.habitSeqId}
+            field={field}
+            onLogged={onLogged}
+          />
         ))}
       </div>
     </div>
