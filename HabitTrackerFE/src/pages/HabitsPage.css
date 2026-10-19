@@ -39,6 +39,7 @@
 }
 
 .habits-list__row {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -52,16 +53,20 @@
   opacity: 0.6;
 }
 
+.habits-list__link {
+  position: absolute;
+  inset: 0;
+}
+
 .habits-list__name {
   font-family: var(--font-display);
   font-size: var(--text-md);
   color: var(--color-ink);
-  text-decoration: none;
   font-weight: 600;
 }
 
 @media (hover: hover) {
-  .habits-list__name:hover {
+  .habits-list__row:hover .habits-list__name {
     color: var(--color-accent);
   }
 }
@@ -81,6 +86,7 @@
 }
 
 .habits-list__actions {
+  position: relative;
   display: flex;
   gap: var(--space-xs);
   flex-shrink: 0;

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { api, ApiError } from "../lib/api";
 import type { ConsistencyResponse, EntryResponse, HabitFieldResponse } from "../lib/types";
 import { EntryLogger } from "./EntryLogger";
@@ -71,6 +72,12 @@ export function FieldPanel({ field, onEdit, onDelete }: FieldPanelProps) {
 
   return (
     <div className="field-panel">
+      <Link
+        to={`/habits/${field.habitSeqId}/fields/${field.habitFieldSeqId}`}
+        className="field-panel__link"
+        aria-label={`Open ${field.fieldName}`}
+      />
+
       <div className="field-panel__head">
         <div>
           <h3 className="field-panel__name">{field.fieldName}</h3>
@@ -90,15 +97,17 @@ export function FieldPanel({ field, onEdit, onDelete }: FieldPanelProps) {
         </div>
       </div>
 
-      <EntryLogger
-        habitFieldSeqId={field.habitFieldSeqId}
-        fieldType={field.fieldType}
-        unit={field.unit}
-        goalValue={field.goalValue}
-        initialValue={loggedToday ? latest!.entryValue : null}
-        initialCompleted={loggedToday ? latest!.completed : false}
-        onLogged={handleLogged}
-      />
+      <div className="field-panel__logger">
+        <EntryLogger
+          habitFieldSeqId={field.habitFieldSeqId}
+          fieldType={field.fieldType}
+          unit={field.unit}
+          goalValue={field.goalValue}
+          initialValue={loggedToday ? latest!.entryValue : null}
+          initialCompleted={loggedToday ? latest!.completed : false}
+          onLogged={handleLogged}
+        />
+      </div>
 
       {loading ? (
         <p className="field__helper">Loading…</p>

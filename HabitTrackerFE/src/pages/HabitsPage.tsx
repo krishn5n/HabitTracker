@@ -72,10 +72,13 @@ export function HabitsPage() {
         <ul className="habits-list">
           {habits.map((habit) => (
             <li key={habit.habitSeqId} className={`habits-list__row${habit.active ? "" : " habits-list__row--inactive"}`}>
+              <Link
+                className="habits-list__link"
+                to={`/habits/${habit.habitSeqId}`}
+                aria-label={`Open ${habit.name}`}
+              />
               <div>
-                <Link className="habits-list__name" to={`/habits/${habit.habitSeqId}`}>
-                  {habit.name}
-                </Link>
+                <span className="habits-list__name">{habit.name}</span>
                 {habit.description && <p className="habits-list__description">{habit.description}</p>}
                 {!habit.active && <span className="habits-list__badge">Removed</span>}
               </div>
