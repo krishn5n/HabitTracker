@@ -32,9 +32,12 @@ export function HabitTile({ habitSeqId, field, wide = false, onLogged }: HabitTi
 
   return (
     <div className={`habit-tile${wide ? " habit-tile--wide" : ""}`}>
-      <Link to={`/habits/${habitSeqId}/fields/${field.habitFieldSeqId}`} className="habit-tile__name">
-        {field.fieldName}
-      </Link>
+      <Link
+        to={`/habits/${habitSeqId}/fields/${field.habitFieldSeqId}`}
+        className="habit-tile__link"
+        aria-label={`Open ${field.fieldName}`}
+      />
+      <span className="habit-tile__name">{field.fieldName}</span>
       <span className="habit-tile__value">
         {field.todayValue ?? "—"}
         {field.unit && field.todayValue !== null ? <span className="habit-tile__unit">{field.unit}</span> : null}
