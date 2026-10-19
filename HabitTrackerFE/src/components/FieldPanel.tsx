@@ -12,6 +12,13 @@ interface FieldPanelProps {
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
 
+const MS_PER_DAY = 86_400_000;
+
+function windowDays(windowStart: string, windowEnd: string): number {
+  const span = Date.parse(windowEnd) - Date.parse(windowStart);
+  return Math.max(1, Math.round(span / MS_PER_DAY) + 1);
+}
+
 export function FieldPanel({ field, onEdit, onDelete }: FieldPanelProps) {
   const [latest, setLatest] = useState<EntryResponse | null>(null);
   const [consistency, setConsistency] = useState<ConsistencyResponse | null>(null);
@@ -47,7 +54,10 @@ export function FieldPanel({ field, onEdit, onDelete }: FieldPanelProps) {
   const today = todayIso();
   const loggedToday = latest?.entryDate === today;
   const logged = consistency?.entries.length ?? 0;
-  const metRate = logged > 0 ? Math.round((consistency!.entries.filter((e) => e.completed).length / logged) * 100) : null;
+  const trackedDays = consistency ? windowDays(consistency.windowStart, consistency.windowEnd) : 0;
+  const metRate = consistency
+    ? Math.round((consistency.entries.filter((e) => e.completed).length / trackedDays) * 100)
+    : null;
   const goalLabel = field.goalValue !== null ? `${field.goalValue}${field.unit ? ` ${field.unit}` : ""}` : "Any";
 
   function handleLogged(entry: EntryResponse) {
@@ -108,7 +118,9 @@ export function FieldPanel({ field, onEdit, onDelete }: FieldPanelProps) {
             </div>
             <div className="field-panel__stat">
               <dt>Days logged</dt>
-              <dd>{logged}</dd>
+              <dd>
+                {logged} / {trackedDays}
+              </dd>
             </div>
             <div className="field-panel__stat">
               <dt>Goal</dt>
