@@ -8,8 +8,11 @@ public record RegistrationOptionsResponse(
         String challenge,
         List<PubKeyCredParam> pubKeyCredParams,
         long timeout,
-        String attestation
+        String attestation,
+        AuthenticatorSelection authenticatorSelection
 ) {
+    public record AuthenticatorSelection(String residentKey, boolean requireResidentKey, String userVerification) {}
+
     public record RelyingParty(String id, String name) {}
 
     public record UserEntity(String id, String name, String displayName) {}

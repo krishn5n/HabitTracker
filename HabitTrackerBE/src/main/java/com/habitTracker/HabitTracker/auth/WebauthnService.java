@@ -1,5 +1,6 @@
 package com.habitTracker.HabitTracker.auth;
 
+import com.habitTracker.HabitTracker.auth.dto.DiscoverableLoginVerifyRequest;
 import com.habitTracker.HabitTracker.auth.dto.LoginOptionsRequest;
 import com.habitTracker.HabitTracker.auth.dto.LoginOptionsResponse;
 import com.habitTracker.HabitTracker.auth.dto.LoginVerifyRequest;
@@ -39,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Set;
@@ -83,7 +85,9 @@ public class WebauthnService {
                         .map(p -> new RegistrationOptionsResponse.PubKeyCredParam(p.getType().getValue(), (int) p.getAlg().getValue()))
                         .collect(Collectors.toList()),
                 TIMEOUT_MILLIS,
-                "none"
+                "none",
+                // Discoverable credentials are what passkey autofill lists on the login page.
+                new RegistrationOptionsResponse.AuthenticatorSelection("required", true, "preferred")
         );
     }
 
@@ -172,6 +176,46 @@ public class WebauthnService {
             throw new IllegalArgumentException("Credential does not belong to email: " + request.email());
         }
 
+        verifyAssertion(challenge, credential, request.credentialId(), request.userHandle(),
+                request.authenticatorData(), request.clientDataJSON(), request.signature());
+
+        String token = jwtService.issue(user.getUserSeqId(), user.getEmail());
+        return new LoginVerifyResponse(token, user.getUserSeqId(), user.getEmail());
+    }
+
+    /** Options for passkey autofill: no email yet, so the browser offers every discoverable passkey for this RP. */
+    public LoginOptionsResponse discoverableLoginOptions() {
+        Challenge challenge = challengeStore.issueDiscoverable();
+
+        return new LoginOptionsResponse(
+                Base64UrlUtil.encodeToString(challenge.getValue()),
+                TIMEOUT_MILLIS,
+                rpId,
+                "preferred",
+                List.of()
+        );
+    }
+
+    @Transactional
+    public LoginVerifyResponse discoverableLoginVerify(DiscoverableLoginVerifyRequest request) {
+        Challenge challenge = challengeStore.consumeDiscoverable(request.challenge());
+
+        WebauthnCredential credential = credentialRepository.findByCredentialId(request.credentialId())
+                .orElseThrow(() -> new EntityNotFoundException("Credential not found: " + request.credentialId()));
+        User user = credential.getUser();
+        if (!Arrays.equals(Base64UrlUtil.decode(request.userHandle()), userHandleFor(user.getEmail()))) {
+            throw new IllegalArgumentException("Credential does not belong to the returned user handle");
+        }
+
+        verifyAssertion(challenge, credential, request.credentialId(), request.userHandle(),
+                request.authenticatorData(), request.clientDataJSON(), request.signature());
+
+        String token = jwtService.issue(user.getUserSeqId(), user.getEmail());
+        return new LoginVerifyResponse(token, user.getUserSeqId(), user.getEmail());
+    }
+
+    private void verifyAssertion(Challenge challenge, WebauthnCredential credential, String credentialId,
+                                 String userHandle, String authenticatorData, String clientDataJSON, String signature) {
         AttestedCredentialData attestedCredentialData = attestedCredentialDataConverter.convert(
                 Base64.getDecoder().decode(credential.getPublicKeyCose()));
 
@@ -185,12 +229,12 @@ public class WebauthnService {
         );
 
         AuthenticationRequest authenticationRequest = new AuthenticationRequest(
-                Base64UrlUtil.decode(request.credentialId()),
-                request.userHandle() == null ? null : Base64UrlUtil.decode(request.userHandle()),
-                Base64UrlUtil.decode(request.authenticatorData()),
-                Base64UrlUtil.decode(request.clientDataJSON()),
+                Base64UrlUtil.decode(credentialId),
+                userHandle == null ? null : Base64UrlUtil.decode(userHandle),
+                Base64UrlUtil.decode(authenticatorData),
+                Base64UrlUtil.decode(clientDataJSON),
                 null,
-                Base64UrlUtil.decode(request.signature())
+                Base64UrlUtil.decode(signature)
         );
 
         ServerProperty serverProperty = new ServerProperty(new Origin(originUrl), rpId, challenge, null);
@@ -200,9 +244,6 @@ public class WebauthnService {
         webAuthnManager.verify(authenticationData, authenticationParameters);
 
         credential.setSignCount(authenticationData.getAuthenticatorData().getSignCount());
-
-        String token = jwtService.issue(user.getUserSeqId(), user.getEmail());
-        return new LoginVerifyResponse(token, user.getUserSeqId(), user.getEmail());
     }
 
     private byte[] userHandleFor(String email) {

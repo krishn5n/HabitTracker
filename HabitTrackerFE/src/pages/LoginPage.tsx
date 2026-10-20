@@ -1,8 +1,13 @@
-import { useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api, ApiError } from "../lib/api";
-import { getCredential, isWebAuthnSupported, type LoginOptionsResponse } from "../lib/webauthn";
+import {
+  getCredential,
+  isConditionalMediationAvailable,
+  isWebAuthnSupported,
+  type LoginOptionsResponse,
+} from "../lib/webauthn";
 import "./AuthPage.css";
 
 interface LoginVerifyResponse {
@@ -18,6 +23,43 @@ export function LoginPage() {
   const [email, setEmail] = useState(location.state?.email ?? "");
   const [status, setStatus] = useState<"idle" | "working" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  const autofillAbort = useRef<AbortController | null>(null);
+
+  // Passkey autofill: a pending "conditional" request makes the browser list saved passkeys
+  // in the email field's suggestions. Picking one signs in without typing the email.
+  const armPasskeyAutofill = useCallback(() => {
+    const controller = new AbortController();
+    autofillAbort.current = controller;
+
+    void (async () => {
+      if (!(await isConditionalMediationAvailable())) return;
+      let picked = false;
+      try {
+        const options = await api.post<LoginOptionsResponse>("/api/auth/webauthn/login/discoverable/options");
+        const assertion = await getCredential(options, { mediation: "conditional", signal: controller.signal });
+        picked = true;
+        setStatus("working");
+        setError(null);
+        const result = await api.post<LoginVerifyResponse>("/api/auth/webauthn/login/discoverable/verify", {
+          challenge: options.challenge,
+          ...assertion,
+        });
+        signIn({ userSeqId: result.userSeqId, email: result.email }, result.token);
+        navigate("/", { replace: true });
+      } catch (err) {
+        // Autofill is a shortcut; failures before a passkey is picked stay silent and the
+        // email + button flow keeps working.
+        if (controller.signal.aborted || !picked) return;
+        setStatus("error");
+        setError(err instanceof ApiError ? err.detail : "Couldn't sign you in. Try again.");
+      }
+    })();
+  }, [signIn, navigate]);
+
+  useEffect(() => {
+    armPasskeyAutofill();
+    return () => autofillAbort.current?.abort();
+  }, [armPasskeyAutofill]);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -25,6 +67,8 @@ export function LoginPage() {
       setError("This browser doesn't support passkeys. Try the latest Chrome, Safari, or Edge.");
       return;
     }
+    // Only one WebAuthn request may be pending; drop the autofill one before the modal prompt.
+    autofillAbort.current?.abort();
     setStatus("working");
     setError(null);
     try {
@@ -46,6 +90,7 @@ export function LoginPage() {
       } else {
         setError("Couldn't sign you in. Try again.");
       }
+      armPasskeyAutofill();
     }
   }
 
@@ -72,7 +117,7 @@ export function LoginPage() {
               name="email"
               className="control"
               type="email"
-              autoComplete="email"
+              autoComplete="username webauthn"
               inputMode="email"
               autoCapitalize="none"
               autoCorrect="off"

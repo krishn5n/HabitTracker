@@ -1,5 +1,6 @@
 package com.habitTracker.HabitTracker.auth;
 
+import com.habitTracker.HabitTracker.auth.dto.DiscoverableLoginVerifyRequest;
 import com.habitTracker.HabitTracker.auth.dto.LoginOptionsRequest;
 import com.habitTracker.HabitTracker.auth.dto.LoginOptionsResponse;
 import com.habitTracker.HabitTracker.auth.dto.LoginVerifyRequest;
@@ -40,5 +41,15 @@ public class AuthController {
     @PostMapping("/login/verify")
     public LoginVerifyResponse loginVerify(@Valid @RequestBody LoginVerifyRequest request) {
         return webauthnService.loginVerify(request);
+    }
+
+    @PostMapping("/login/discoverable/options")
+    public LoginOptionsResponse discoverableLoginOptions() {
+        return webauthnService.discoverableLoginOptions();
+    }
+
+    @PostMapping("/login/discoverable/verify")
+    public LoginVerifyResponse discoverableLoginVerify(@Valid @RequestBody DiscoverableLoginVerifyRequest request) {
+        return webauthnService.discoverableLoginVerify(request);
     }
 }

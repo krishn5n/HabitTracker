@@ -21,6 +21,7 @@ export interface RegistrationOptionsResponse {
   pubKeyCredParams: { type: "public-key"; alg: number }[];
   timeout: number;
   attestation: AttestationConveyancePreference;
+  authenticatorSelection: AuthenticatorSelectionCriteria;
 }
 
 export interface LoginOptionsResponse {
@@ -52,7 +53,10 @@ export async function createCredential(options: RegistrationOptionsResponse) {
   };
 }
 
-export async function getCredential(options: LoginOptionsResponse) {
+export async function getCredential(
+  options: LoginOptionsResponse,
+  request: Omit<CredentialRequestOptions, "publicKey"> = {},
+) {
   const publicKey: CredentialRequestOptions["publicKey"] = {
     ...options,
     challenge: base64urlToBuffer(options.challenge),
@@ -62,7 +66,7 @@ export async function getCredential(options: LoginOptionsResponse) {
     })),
   };
 
-  const assertion = (await navigator.credentials.get({ publicKey })) as PublicKeyCredential;
+  const assertion = (await navigator.credentials.get({ ...request, publicKey })) as PublicKeyCredential;
   const response = assertion.response as AuthenticatorAssertionResponse;
 
   return {
@@ -76,4 +80,13 @@ export async function getCredential(options: LoginOptionsResponse) {
 
 export function isWebAuthnSupported() {
   return typeof window !== "undefined" && !!window.PublicKeyCredential;
+}
+
+/** True when the browser can offer passkeys in a field's autofill (`autocomplete="... webauthn"`). */
+export async function isConditionalMediationAvailable() {
+  return (
+    isWebAuthnSupported() &&
+    typeof PublicKeyCredential.isConditionalMediationAvailable === "function" &&
+    (await PublicKeyCredential.isConditionalMediationAvailable())
+  );
 }
